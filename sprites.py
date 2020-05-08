@@ -71,7 +71,7 @@ class Player(pg.sprite.Sprite):
     def move(self, dx=0, dy=0):
         '''This method will move the player on the x, y coordinate based on the
         input '''
-        if not self.collide_with_walls(dx, dy):
+        if not self.collideWithWalls(dx, dy):
             
             # Create a water tile at the previous position
             Water(self.game, self.x, self.y)
@@ -81,10 +81,16 @@ class Player(pg.sprite.Sprite):
             self.y += dy
             
             # Update the scorekeeper
-            self.game.scoreKeeperTop.setCompleteTiles(self.game.scoreKeeperTop.getCompleteTiles() + 1)            
+            self.game.scoreKeeperTop.setCompleteTiles(self.game.scoreKeeperTop.getCompleteTiles() + 1)
+            self.game.scoreKeeperBottom.setScore(self.game.scoreKeeperBottom.getScore() + 1)
             
             # Play the sound
             self.game.moveSound.play()
+            
+            # If reached finish line, update the score and load next map
+            self.collideWithFinish()
+            
+            
 
     def update(self):
         '''This method updates the player sprite '''
@@ -100,7 +106,7 @@ class Player(pg.sprite.Sprite):
         self.rect.x = self.x * TILESIZE
         self.rect.y = self.y * TILESIZE
         
-    def collide_with_walls(self, dx=0, dy=0):
+    def collideWithWalls(self, dx=0, dy=0):
         ''' This method checks if the player has collison with any walls '''
         
         # Checks all the wall entities
@@ -110,6 +116,23 @@ class Player(pg.sprite.Sprite):
                
         # Allow player to move if theres nothing blocking
         return False
+    
+    def collideWithFinish(self):
+        ''' This method checks if the player has reached the finish line '''
+        if self.game.endTile.x == self.x and self.game.endTile.y == self.y:
+            
+            #Checks if bonus score can be applied
+            if self.game.scoreKeeperTop.checkFinish():
+                # Gives x2 bonus score if no reset/death, otherwise give the normal score
+                
+                if not self.game.resetOnce:
+                    self.game.scoreKeeperBottom.setScore(self.game.scoreKeeperBottom.getScore() + self.game.scoreKeeperTop.getTotalTiles() * 2)
+                    
+                else:
+                    self.game.scoreKeeperBottom.setScore(self.game.scoreKeeperBottom.getScore() + self.game.scoreKeeperTop.getTotalTiles())
+                
+                #game.nextLevel()
+                
 
         
 
@@ -200,7 +223,7 @@ class Unused(pg.sprite.Sprite):
         self.image.set_colorkey((0,0,0))
         
 class ScoreKeeperTop(pg.sprite.Sprite):
-    ''' This class defines the scoreboard in where you keep track of the current score '''
+    ''' This class defines the scoreboard in where you keep track of the status of the player '''
     
     def __init__(self, game):
         ''' Initalizer takes the screen surface parameters to set location of the scorekeeper '''
@@ -252,6 +275,11 @@ class ScoreKeeperTop(pg.sprite.Sprite):
         return self.completeTiles            
         
         
+    def checkFinish(self):
+        ''' This method checks if the player has finished the level by passing all tiles '''
+        return (self.completeTiles == self.totalTiles)
+        
+        
     def setCurrentLevel(self, amount):
         ''' This method lets the scoreboard know the current level'''
         self.currentLevel = amount
@@ -264,8 +292,55 @@ class ScoreKeeperTop(pg.sprite.Sprite):
         '''This method will be called automatically to display 
         the game information at the top of the game window.'''
  
-        # The text that contains the score that constantly update
+        # The text that contains the information that constantly update
         self.message = "%11s%3d%20d%s%-20d%s%3d" % ( "LEVEL", self.currentLevel, self.completeTiles,\
                                                                                "/", self.totalTiles, "SOLVED", self.solvedLevels)
         self.image = self.font.render(self.message, 1, (0, 0, 0))
                
+               
+class ScoreKeeperBottom(pg.sprite.Sprite):
+    ''' This class defines the scoreboard in where you keep track of the current score '''
+    
+    def __init__(self, game):
+        ''' Initalizer takes the screen surface parameters to set location of the scorekeeper '''
+        
+        #Adds to all sprite group
+        self.groups = game.scoreSprites
+        pg.sprite.Sprite.__init__(self, self.groups)
+        
+        # Call the sprite __init__() method
+        pg.sprite.Sprite.__init__(self)
+
+        # Sets the font used for the sprite
+        self.font = pg.font.Font('font/arcade.ttf', 16)
+        
+        # Keeps track of the score
+        self.score = 0        
+        
+        # The text that contains the score that constantly update
+        self.message = "POINTS %-4d" % self.score
+        self.image = self.font.render(self.message, 1, (0, 0, 0))        
+        
+        # Set the position of the sprites
+        self.rect = self.image.get_rect()
+        self.rect.centery = HEIGHT - 15
+        self.rect.centerx = WIDTH - TILESIZE * 3
+        
+    
+    def setScore(self, amount):
+        ''' This method updates the current score '''
+        self.score = amount
+        
+    def getScore(self):
+        ''' This method returns the current score '''
+        return self.score
+    
+    def update(self):
+        '''This method will be called automatically to display 
+        the game information at the bottom of the game window.'''
+        
+        # The text that contains the score that constantly update
+        self.message = "POINTS %-4d" % self.score
+        self.image = self.font.render(self.message, 1, (0, 0, 0))       
+
+        

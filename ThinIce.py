@@ -31,6 +31,12 @@ class Game():
         
         # Clock used to set the frame rate
         self.clock = pg.time.Clock()
+        
+        # Contains the end point of each level for event handling
+        self.endTile = object()
+        
+        # Checks if player has reset once on the map
+        self.resetOnce = True
            
         
     def loadData(self):
@@ -69,7 +75,7 @@ class Game():
                     Free(self, col, row)
                     totalFree += 1
                 if tile == 'E':
-                    End(self, col, row)
+                    self.endTile = End(self, col, row)
                 if tile == 'P':
                     Free(self, col, row)
                     self.player = Player(self, col, row)
@@ -92,6 +98,7 @@ class Game():
         self.scoreSprites = pg.sprite.Group()
         
         self.scoreKeeperTop = ScoreKeeperTop(self)
+        self.scoreKeeperBottom = ScoreKeeperBottom(self)
         
         # Load the map
         self.loadMap()
@@ -109,11 +116,13 @@ class Game():
             self.events()
             self.update()
             self.draw()
+            
 
     def update(self):
         '''This method updates all classes/objects as part of the game loop '''
         self.allSprites.update()
         self.scoreSprites.update()
+
 
     def drawGrid(self):
         '''This method draws the grid for more precise x,y coordinates '''
