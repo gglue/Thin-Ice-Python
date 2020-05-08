@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with TexturePacker https://www.codeandweb.com/texturepacker -->
+<!-- $TexturePacker:SmartUpdate:648142e3a9e0c32d729a473ce9b6f7ea:74c01baf1513aa942ddf424fe98774b3:24580347a1671c8b1948e780ceccfe79$ -->
+<!--Format:
+name  => name of the sprite
+x  => sprite x pos in texture
+y  => sprite y pos in texture
+w  => sprite width (may be trimmed)
+h  => sprite height (may be trimmed)
+pX => x pos of the pivot point (relative to sprite width)
+pY => y pos of the pivot point (relative to sprite height)
+oX => sprite's x-corner offset (only available if trimmed)
+oY => sprite's y-corner offset (only available if trimmed)
+oW => sprite's original width (only available if trimmed)
+oH => sprite's original height (only available if trimmed)
+r => 'y' only set if sprite is rotated
+with polygon mode enabled:
+vertices   => points in sprite coordinate system (x0,y0,x1,y1,x2,y2, ...)
+verticesUV => points in sheet coordinate system (x0,y0,x1,y1,x2,y2, ...)
+triangles  => sprite triangulation, 3 vertex indices per triangle
+-->
+<TextureAtlas imagePath="water.png" width="1053" height="27">
+    <sprite name="1.png" x="1" y="1" w="25" h="25"/>
+    <sprite name="2.png" x="298" y="1" w="25" h="25"/>
+    <sprite name="3.png" x="595" y="1" w="25" h="25"/>
+    <sprite name="4.png" x="892" y="1" w="25" h="25"/>
+    <sprite name="5.png" x="919" y="1" w="25" h="25"/>
+    <sprite name="6.png" x="946" y="1" w="25" h="25"/>
+    <sprite name="7.png" x="973" y="1" w="25" h="25"/>
+    <sprite name="8.png" x="1000" y="1" w="25" h="25"/>
+    <sprite name="9.png" x="1027" y="1" w="25" h="25"/>
+    <sprite name="10.png" x="28" y="1" w="25" h="25"/>
+    <sprite name="11.png" x="55" y="1" w="25" h="25"/>
+    <sprite name="12.png" x="82" y="1" w="25" h="25"/>
+    <sprite name="13.png" x="109" y="1" w="25" h="25"/>
+    <sprite name="14.png" x="136" y="1" w="25" h="25"/>
+    <sprite name="15.png" x="163" y="1" w="25" h="25"/>
+    <sprite name="16.png" x="190" y="1" w="25" h="25"/>
+    <sprite name="17.png" x="217" y="1" w="25" h="25"/>
+    <sprite name="18.png" x="244" y="1" w="25" h="25"/>
+    <sprite name="19.png" x="271" y="1" w="25" h="25"/>
+    <sprite name="20.png" x="325" y="1" w="25" h="25"/>
+    <sprite name="21.png" x="352" y="1" w="25" h="25"/>
+    <sprite name="22.png" x="379" y="1" w="25" h="25"/>
+    <sprite name="23.png" x="406" y="1" w="25" h="25"/>
+    <sprite name="24.png" x="433" y="1" w="25" h="25"/>
+    <sprite name="25.png" x="460" y="1" w="25" h="25"/>
+    <sprite name="26.png" x="487" y="1" w="25" h="25"/>
+    <sprite name="27.png" x="514" y="1" w="25" h="25"/>
+    <sprite name="28.png" x="541" y="1" w="25" h="25"/>
+    <sprite name="29.png" x="568" y="1" w="25" h="25"/>
+    <sprite name="30.png" x="622" y="1" w="25" h="25"/>
+    <sprite name="31.png" x="649" y="1" w="25" h="25"/>
+    <sprite name="32.png" x="676" y="1" w="25" h="25"/>
+    <sprite name="33.png" x="703" y="1" w="25" h="25"/>
+    <sprite name="34.png" x="730" y="1" w="25" h="25"/>
+    <sprite name="35.png" x="757" y="1" w="25" h="25"/>
+    <sprite name="36.png" x="784" y="1" w="25" h="25"/>
+    <sprite name="37.png" x="811" y="1" w="25" h="25"/>
+    <sprite name="38.png" x="838" y="1" w="25" h="25"/>
+    <sprite name="39.png" x="865" y="1" w="25" h="25"/>
+</TextureAtlas>

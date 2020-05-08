@@ -12,14 +12,14 @@ from settings import *
 class Spritesheet:
     '''This class is used to grab smaller sprites from spritesheets '''
     
-    def __init__(self, filename):
+    def __init__(self, filename, xmlName):
         '''This initializer takes the file name as a parameter to load'''
         
         #Loads the PNG file
         self.spritesheet = pg.image.load(filename).convert()
         
         #Loads the XML file
-        self.xml = ET.parse(PLAYERXML)
+        self.xml = ET.parse(xmlName)
         self.root = self.xml.getroot() 
         
         #Variable used to store frame number
@@ -52,8 +52,8 @@ class Player(pg.sprite.Sprite):
         self.game = game
         
         self.currentFrame = 1
-        self.image = self.game.spriteSheet.get_image(self.currentFrame)
-        self.image.set_colorkey((255,255,255))
+        self.image = self.game.playerSpriteSheet.get_image(self.currentFrame)
+        self.image.set_colorkey(BLUE)
         self.rect = self.image.get_rect()
         
         # Set the starting coordinates
@@ -61,27 +61,111 @@ class Player(pg.sprite.Sprite):
         self.y = y
         
         #states to check the player's status
-        self.alive = True
+        # 1 = alive
+        # 2 = dead
+        # 3 = respawning
+        self.status = 1
         
 
 
     def move(self, dx=0, dy=0):
         '''This method will move the player on the x, y coordinate based on the
         input '''
-        self.x += dx
-        self.y += dy
+        if not self.collide_with_walls(dx, dy):
+            self.x += dx
+            self.y += dy
 
     def update(self):
         '''Updates the player sprite '''
         
         self.currentFrame += 1
         
-        self.image = self.game.spriteSheet.get_image(self.currentFrame)
-        
+        self.image = self.game.playerSpriteSheet.get_image(self.currentFrame)
+        self.image.set_colorkey(BLUE)
         if self.currentFrame == 54:
             self.currentFrame = 1 
             
         self.rect.x = self.x * TILESIZE
-        self.rect.y = self.y * TILESIZE        
+        self.rect.y = self.y * TILESIZE
+        
+    def collide_with_walls(self, dx=0, dy=0):
+        for wall in self.game.walls:
+            if wall.x == self.x + dx and wall.y == self.y + dy:
+                return True
+        return False
 
         
+
+class Immovable(pg.sprite.Sprite):
+    ''' This class represents a tile in the game that you won't be able to move through '''
+    def __init__(self, game, x, y):
+        self.groups = game.allSprites, game.walls
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.rect = self.image.get_rect()
+        self.x = x
+        self.y = y
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
+        
+        
+class Wall(Immovable):
+    ''' This class represents a wall in game '''
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y)
+        
+        self.image = pg.image.load("images/wall.png")
+        self.image.set_colorkey((255,255,255))  
+        
+
+class Unused(Immovable):
+    ''' This class represents an unused tile in game '''
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y)
+        
+        self.image = pg.image.load("images/unused.png")
+        self.image.set_colorkey((255,255,255))  
+
+        
+class Water(Immovable):
+    ''' This class represents a water block in game '''
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y)
+        
+        self.currentFrame = 1
+        self.image = self.game.waterSpriteSheet.get_image(self.currentFrame)
+        self.image.set_colorkey((255,255,255))
+        
+
+    def update(self):
+        '''Updates the player sprite '''
+        
+        self.currentFrame += 1
+        
+        self.image = self.game.waterSpriteSheet.get_image(self.currentFrame)
+        
+        if self.currentFrame == 39:
+            self.currentFrame = 1
+            
+            
+class Movable(pg.sprite.Sprite):
+    ''' This class represents a tile in the game that you will be able to move through '''
+    def __init__(self, game, x, y):
+        self.groups = game.allSprites, game.movable
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.rect = self.image.get_rect()
+        self.x = x
+        self.y = y
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
+        
+class Free(Movable):
+    ''' This class represents a free tile in game '''
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y)
+        
+        self.image = pg.image.load("images/free.png")
+        self.image.set_colorkey((255,255,255))  
