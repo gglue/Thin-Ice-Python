@@ -72,8 +72,10 @@ class Player(pg.sprite.Sprite):
         '''This method will move the player on the x, y coordinate based on the
         input '''
         if not self.collide_with_walls(dx, dy):
+            Water(self.game, self.x, self.y)
             self.x += dx
             self.y += dy
+            self.game.moveSound.play()
 
     def update(self):
         '''Updates the player sprite '''
@@ -125,9 +127,9 @@ class Unused(Immovable):
         super().__init__(game, x, y)
         
         self.image = pg.image.load("images/unused.png")
-        self.image.set_colorkey((255,255,255))  
-
+        self.image.set_colorkey((255,255,255))
         
+                
 class Water(Immovable):
     ''' This class represents a water block in game '''
     def __init__(self, game, x, y):
@@ -146,7 +148,7 @@ class Water(Immovable):
         self.image = self.game.waterSpriteSheet.get_image(self.currentFrame)
         
         if self.currentFrame == 39:
-            self.currentFrame = 1
+            self.currentFrame = 7
             
             
 class Movable(pg.sprite.Sprite):

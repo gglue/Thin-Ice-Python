@@ -23,7 +23,7 @@ class Game():
         pg.display.set_caption("Thin-Ice!")
         
         # Allows to hold down input keys
-        pg.key.set_repeat(500, 100)
+        pg.key.set_repeat(150, 150)
         self.screen = pg.display.set_mode((WIDTH, HEIGHT))
         
         # Clock used to set the frame rate
@@ -41,6 +41,10 @@ class Game():
         # Loads the Background music
         pg.mixer.music.load('sound/music.mp3')
         pg.mixer.music.set_volume(0.1)
+        
+        # Sound effect when a player moves
+        self.moveSound = pg.mixer.Sound("sound/move.mp3")
+        self.moveSound.set_volume(0.05)
 
     def loadMap(self):
         '''Load the current level by reading a .txt '''
