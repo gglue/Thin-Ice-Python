@@ -20,7 +20,10 @@ class Game():
         # Starts up the game and the audio
         pg.init()
         pg.mixer.init()
+        
+        # Set title and icon
         pg.display.set_caption("Thin-Ice!")
+        pg.display.set_icon(pg.image.load('images/icon.png'))
         
         # Allows to hold down input keys
         pg.key.set_repeat(150, 150)
@@ -28,10 +31,7 @@ class Game():
         
         # Clock used to set the frame rate
         self.clock = pg.time.Clock()
-        
-        # Holds the map data
-        self.mapData = []
-        
+           
         
     def loadData(self):
         '''This method loads data from files outside of Python'''
@@ -48,36 +48,56 @@ class Game():
 
     def loadMap(self):
         '''Load the current level by reading a .txt '''
-        currentMap = open("test.txt", "r")
+        
+        #Resets the map-related variables
+        mapData = []
+        totalFree = 1
+        # Opens the file and appends all the data to mapData
+        currentMap = open("maps/levelOne.txt", "r")
         for line in currentMap:
-            self.mapData.append(line)
-            
-        for row, tiles in enumerate(self.mapData):
+            mapData.append(line)
+        
+        
+        # Generates the map based on the text file    
+        for row, tiles in enumerate(mapData):
             for col, tile in enumerate(tiles):
                 if tile == 'W':
                     Wall(self, col, row)
                 if tile == '0':
                     Unused(self, col, row)
                 if tile == 'F':
-                    Free(self, col, row) 
+                    Free(self, col, row)
+                    totalFree += 1
+                if tile == 'E':
+                    End(self, col, row)
                 if tile == 'P':
                     Free(self, col, row)
                     self.player = Player(self, col, row)
+        
+        # subtracting the top row and bottom row free because they're meant for the menu lol            
+        self.scoreKeeperTop.setTotalTiles(totalFree - (2*19))
                     
 
 
     def new(self):
         '''This method initializes all the variables and sets up the game '''
         
+        # Loads external data
         self.loadData()
         
+        # Creates the groups used for event handling later on
         self.allSprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
         self.movable = pg.sprite.Group()
+        self.scoreSprites = pg.sprite.Group()
+        
+        self.scoreKeeperTop = ScoreKeeperTop(self)
         
         # Load the map
-        self.loadMap()        
+        self.loadMap()
         
+        
+        # Plays and infinitely loops the music
         pg.mixer.music.play(-1)
         
 
@@ -93,6 +113,7 @@ class Game():
     def update(self):
         '''This method updates all classes/objects as part of the game loop '''
         self.allSprites.update()
+        self.scoreSprites.update()
 
     def drawGrid(self):
         '''This method draws the grid for more precise x,y coordinates '''
@@ -106,6 +127,7 @@ class Game():
         self.screen.fill(BGCOLOR)
         #self.drawGrid()
         self.allSprites.draw(self.screen)
+        self.scoreSprites.draw(self.screen)
         pg.display.flip()
               
 
