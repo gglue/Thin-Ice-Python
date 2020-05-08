@@ -1,13 +1,16 @@
 # game settings
-WIDTH = 640   # 16 * 64 or 32 * 32 or 64 * 16
-HEIGHT = 480  # 16 * 48 or 32 * 24 or 64 * 12
-FPS = 60
+WIDTH = 475   
+HEIGHT = 425
+FPS = 30
 
 DARKGREY = (40, 40, 40)
 YELLOW = (255, 255, 0)
 LIGHTGREY = (100, 100, 100)
 BGCOLOR = DARKGREY
 
-TILESIZE = 32
+PLAYERSPRITE = "images/player.png"
+PLAYERXML = "images/player.xml"
+
+TILESIZE = 25
 GRIDWIDTH = WIDTH / TILESIZE
 GRIDHEIGHT = HEIGHT / TILESIZE
