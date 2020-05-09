@@ -127,7 +127,11 @@ class Player(pg.sprite.Sprite):
          
     def setFrame(self, frameNumber):
         ''' This method sets the current frame of animation '''
-        self.currentFrame = frameNumber     
+        self.currentFrame = frameNumber
+        
+    def getFrame(self):
+        ''' This method gets the current frame of animation '''
+        return self.currentFrame
         
 
     def move(self, dx=0, dy=0):
@@ -157,7 +161,13 @@ class Player(pg.sprite.Sprite):
         self.image.set_colorkey(BLUE)
         
         # I would implement switch case but it doesn't exist in Python
-        # Changes the animation of the sprite based on status variable        
+        # Changes the animation of the sprite based on status variable
+        
+        # THIS IS OUT OF PLACE BUT THE ONLY EFFICIENT WAY TO DO IT
+        # When finishing death animation, resets the map
+        if self.currentFrame == 15:
+            self.game.reset()
+        
         if self.currentFrame == 86:
             self.currentFrame = 28 
         
@@ -182,6 +192,41 @@ class Player(pg.sprite.Sprite):
             return True
         else:
             return False
+        
+    def collideWithTreasure(self):
+        ''' This method checks if the player has touched a treasure bag '''
+        if self.game.treasureTile.x == self.x and self.game.treasureTile.y == self.y:
+            return True
+        else:
+            return False
+        
+    def checkDeath(self):
+        ''' This method checks if the player is stuck '''
+        
+        left = False
+        right = False
+        top = False
+        bottom = False
+        
+        # Checks if the player is able to walk anymore, true meaning can't got that direction
+        for wall in self.game.walls:
+            if wall.x == self.x - 1 and wall.y == self.y + 0:
+                left = True
+            elif wall.x == self.x + 1 and wall.y == self.y + 0:
+                right = True
+            elif wall.x == self.x + 0 and wall.y == self.y - 1:
+                top = True
+            elif wall.x == self.x + 0 and wall.y == self.y + 1:
+                bottom = True                
+        
+        # If all true, it means the player can't move and must die/reset and returns True
+        if left and right and top and bottom:
+            Water(self.game, self.x, self.y)
+            return True
+        else:
+            return False
+            
+        
   
 
 class Immovable(pg.sprite.Sprite):
@@ -255,7 +300,33 @@ class End(Movable):
         
         self.image = pg.image.load("images/finish.png")
         self.image.set_colorkey((255,255,255))
+
+class Item(pg.sprite.Sprite):
+    ''' This class represents sprites that can be picked up 
+    by the user'''
+    
+    def __init__(self, game, x, y):
+        self.groups = game.allSprites, game.items
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.rect = self.image.get_rect()
+        self.x = x
+        self.y = y
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
+    
+
         
+class Treasure(Item):
+    ''' This class represents the treasure bag in the game, which
+    is only spawned if they solved the previous level'''
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y)
+        
+        self.image = pg.image.load("images/treasure.png")
+        self.image.set_colorkey((255,255,255))
+
         
 class Unused(pg.sprite.Sprite):
     ''' This class represents an unused tile in game '''

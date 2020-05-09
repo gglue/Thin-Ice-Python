@@ -35,6 +35,7 @@ class Game():
         # Contains the end point of each level for event handling
         self.endTile = object()
         
+
         # Checks if player has reset once on the map
         self.resetOnce = False
         
@@ -43,6 +44,9 @@ class Game():
         
         # Contains the current level of the game
         self.currentLevel = 1
+        
+        # Lets game remember last level you solved it
+        self.lastLevelSolved = False
               
     def loadData(self):
         '''This method loads data from files outside of Python'''
@@ -65,6 +69,9 @@ class Game():
         self.deadSound = pg.mixer.Sound("sound/dead.wav")
         self.deadSound.set_volume(0.1)
 
+        # Sound effect when a player touches a treasure bag
+        self.treasureSound = pg.mixer.Sound("sound/treasure.wav")
+        self.treasureSound.set_volume(0.1)
 
         # Sound effect when a player is resetted to the start
         self.resetSound = pg.mixer.Sound("sound/reset.wav")
@@ -90,14 +97,19 @@ class Game():
             for col, tile in enumerate(tiles):
                 if tile == 'W':
                     Wall(self, col, row)
-                if tile == '0':
+                elif tile == '0':
                     Unused(self, col, row)
-                if tile == 'F':
+                elif tile == 'F':
                     Free(self, col, row)
                     totalFree += 1
-                if tile == 'E':
+                elif tile == 'E':
                     self.endTile = End(self, col, row)
-                if tile == 'P':
+                elif tile == 'M':
+                    Free(self, col, row)
+                    if (self.lastLevelSolved):
+                        self.treasureTile = Treasure(self, col, row)
+                    totalFree += 1
+                elif tile == 'P':
                     Free(self, col, row)
                     self.player.movetoCoordinate(col,row)
         
@@ -118,6 +130,7 @@ class Game():
         self.allSprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
         self.movable = pg.sprite.Group()
+        self.items = pg.sprite.Group()
         self.scoreSprites = pg.sprite.Group()
         
         # Currents the player sprite before the map loading
@@ -162,6 +175,11 @@ class Game():
         for tiles in self.allSprites:
             tiles.kill()
             
+    def playResetSounds(self):
+        '''This method plays the relevant sounds when you reset or when you die '''
+        self.deadSound.play()
+        self.resetSound.play()        
+    
                
     def reset(self):
         ''' This method resets the current level '''
@@ -169,11 +187,6 @@ class Game():
         # Empty out the map and reload the map
         self.deleteMap()
         self.loadMap()
-        
-        # Play reset animation and play sound effect with it
-        self.player.setFrame(RESETTING)
-        self.deadSound.play()
-        self.resetSound.play()
         
         # Reset the score to 0 or to previous level
         self.scoreKeeperBottom.setScore(self.scoreKeeperBottom.getPreviousScore())
@@ -211,7 +224,10 @@ class Game():
                 
             if event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1 and self.resetButton.rect.collidepoint(pg.mouse.get_pos()):
+                    # Play reset animation and sounds and reset the map when hitting the button
                     self.reset()
+                    self.player.setFrame(RESETTING)
+                    self.playResetSounds()
                 
                 
             if event.type == pg.KEYDOWN:
@@ -239,16 +255,24 @@ class Game():
             
             # Update the scorekeepers
             self.scoreKeeperTop.setCompleteTiles(self.scoreKeeperTop.getCompleteTiles() + 1)
-            self.scoreKeeperBottom.setScore(self.scoreKeeperBottom.getScore() + 1)            
-            print(len(self.allSprites))
+            self.scoreKeeperBottom.setScore(self.scoreKeeperBottom.getScore() + 1)
+            
+            # Check if player touched the finish line yet
             if self.player.collideWithFinish():
                 
                 
-                #Checks if bonus score can be applied
+                # Checks if bonus score can be applied
                 if self.scoreKeeperTop.checkFinish():
+                    
+                    
+                    # Lets game remember last level you solved it
+                    self.lastLevelSolved = True
                     
                     # Plays the bonus sound effect
                     self.allTileComplete.play()
+                    
+                    # Increase the number of solved by 1
+                    self.scoreKeeperTop.setSolvedLevel(self.scoreKeeperTop.getSolvedLevel() + 1)  
                     
                     # Gives x2 bonus score if no reset/death, otherwise give the normal score
                     
@@ -260,10 +284,32 @@ class Game():
                         self.scoreKeeperBottom.setScore(self.scoreKeeperBottom.getScore() + self.scoreKeeperTop.getTotalTiles())
                         self.scoreKeeperBottom.setPreviousScore(self.scoreKeeperBottom.getScore())
                     
-                    
-                self.scoreKeeperTop.setSolvedLevel(self.scoreKeeperTop.getSolvedLevel() + 1)  
+                
+                # Remind game player didn't solve last level    
+                else:
+                    self.lastLevelSolved = False
+                
+                # Go to the next level 
                 self.nextLevel()
                 
+            
+            # If treasure bag exists, check if player touched treasure bag
+            elif self.lastLevelSolved:
+                if  self.player.collideWithTreasure():
+                    self.treasureTile.kill()
+                    self.treasureSound.play()
+                    self.scoreKeeperBottom.setScore(self.scoreKeeperBottom.getScore() + 100)
+            
+            
+            # Checks if the player is unable to move anymore, continued
+            # explaination in Player class
+            if self.player.checkDeath():
+                # Play death animation and sounds and reset the map when hitting the button
+                self.player.setFrame(DYING)
+                self.playResetSounds()
+            
+            
+            # Reset moved variable
             self.moved = False
             
         
