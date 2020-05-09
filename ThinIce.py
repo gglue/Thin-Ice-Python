@@ -40,8 +40,7 @@ class Game():
         
         # Checks if the player has moved successfully
         self.moved = False
-           
-        
+              
     def loadData(self):
         '''This method loads data from files outside of Python'''
         self.playerSpriteSheet = Spritesheet(PLAYERSPRITE, PLAYERXML)
@@ -54,7 +53,11 @@ class Game():
         # Sound effect when a player moves
         self.moveSound = pg.mixer.Sound("sound/move.mp3")
         self.moveSound.set_volume(0.05)
-
+        
+        # Sound effect when a player finishs a level completely
+        self.allTileComplete = pg.mixer.Sound("sound/allTileComplete.mp3")
+        self.allTileComplete.set_volume(0.05)
+        
     def loadMap(self):
         '''Load the current level by reading a .txt '''
         
@@ -81,7 +84,7 @@ class Game():
                     self.endTile = End(self, col, row)
                 if tile == 'P':
                     Free(self, col, row)
-                    self.player = Player(self, col, row)
+                    self.player.movetoCoordinate(col,row)
         
         # subtracting the top row and bottom row free because they're meant for the menu lol            
         self.scoreKeeperTop.setTotalTiles(totalFree - (2*19))
@@ -100,12 +103,15 @@ class Game():
         self.movable = pg.sprite.Group()
         self.scoreSprites = pg.sprite.Group()
         
+        # Currents the player sprite before the map loading
+        self.player = Player(self, 0, 0)        
+        
         self.scoreKeeperTop = ScoreKeeperTop(self)
         self.scoreKeeperBottom = ScoreKeeperBottom(self)
+        self.resetButton = Button(self, "reset", 65, HEIGHT - 13)
         
         # Load the map
         self.loadMap()
-        
         
         # Plays and infinitely loops the music
         pg.mixer.music.play(-1)
@@ -134,6 +140,22 @@ class Game():
         for y in range(0, HEIGHT, TILESIZE):
             pg.draw.line(self.screen, LIGHTGREY, (0, y), (WIDTH, y))
             
+    def reset(self):
+        ''' This method resets the current level '''
+        print("reset")
+        
+        # Empty out the map and reload the map
+        self.walls.empty()
+        self.movable.empty()
+        self.loadMap()
+        
+        # Reset the score to 0 or to previous level
+        self.scoreKeeperBottom.setScore(self.scoreKeeperBottom.getPreviousScore())
+        self.scoreKeeperTop.setCompleteTiles(0)
+        
+        # Tells the game the player reset once
+        self.resetOnce = True
+            
     def draw(self):
         '''This method draws all the sprites onto the screen '''
         self.screen.fill(BGCOLOR)
@@ -150,6 +172,12 @@ class Game():
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 pg.quit()
+                
+            if event.type == pg.MOUSEBUTTONDOWN:
+                if event.button == 1 and self.resetButton.rect.collidepoint(pg.mouse.get_pos()):
+                    self.reset()
+                
+                
             if event.type == pg.KEYDOWN:
                 # Exits the game with the ESC key
                 if event.key == pg.K_ESCAPE:
@@ -172,8 +200,14 @@ class Game():
                
         #If player moved, check if he's on the finish line
         if self.moved:
+            
+            # Update the scorekeepers
+            self.scoreKeeperTop.setCompleteTiles(self.scoreKeeperTop.getCompleteTiles() + 1)
+            self.scoreKeeperBottom.setScore(self.scoreKeeperBottom.getScore() + 1)            
+            
             if self.player.collideWithFinish():
                 print("you win")
+                self.allTileComplete.play()
                 
                 #Checks if bonus score can be applied
                 if self.scoreKeeperTop.checkFinish():
@@ -181,9 +215,11 @@ class Game():
                     
                     if not self.resetOnce:
                         self.scoreKeeperBottom.setScore(self.scoreKeeperBottom.getScore() + self.scoreKeeperTop.getTotalTiles() * 2)
+                        self.scoreKeeperBottom.setPreviousScore(self.scoreKeeperBottom.getScore())
                         
                     else:
                         self.scoreKeeperBottom.setScore(self.scoreKeeperBottom.getScore() + self.scoreKeeperTop.getTotalTiles())
+                        self.scoreKeeperBottom.setPreviousScore(self.scoreKeeperBottom.getScore())
                                
                     #game.nextLevel()
             else:

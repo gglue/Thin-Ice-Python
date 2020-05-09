@@ -36,6 +36,65 @@ class Spritesheet:
         image.blit(self.spritesheet, (0, 0), (int(frame.attrib['x']), int(frame.attrib['y']), int(frame.attrib['w']), int(frame.attrib['h'])))
         return image
 
+
+class Button(pg.sprite.Sprite):
+    ''' This class represents a clickable button in the game '''
+    
+    def __init__(self, game, buttonType, xCoordinate, yCoordinate):
+        '''This initializer takes the game scene as a paraemter, initalizes
+        the image and rect attributes and other variables used for the player'''
+        
+        
+        # Game variable for references
+        self.game = game
+        
+        # Add itself to the score sprite group
+        self.groups = game.scoreSprites
+        pg.sprite.Sprite.__init__(self, self.groups)
+        
+        
+        self.buttonImages = ["images/resetButtonOne.png", "images/resetButtonTwo.png"]
+        
+        
+        # Variable to distingush what the text of the button is
+        if buttonType == "reset":
+            self.number = 0
+        
+        # Set the image
+        self.image = pg.image.load(self.buttonImages[self.number])
+        
+        # Resize the button
+        self.image = pg.transform.scale(self.image, (72, 21))
+        
+        
+        # Set the location of the button
+        self.rect = self.image.get_rect()
+        self.rect.centery = yCoordinate
+        self.rect.centerx = xCoordinate
+        self.image.set_colorkey((255,255,255))
+        
+    def getRect(self):
+        '''Returns the rect properities of the button '''
+        return self.rect
+    
+    def setImage(self, number):
+        '''Sets the image using the image array based on the parameter '''
+        
+        # Set the image
+        self.image = pg.image.load(self.buttonImages[number])
+        
+        # Resize the button
+        self.image = pg.transform.scale(self.image, (72, 21))
+        
+    def update(self):
+        '''Updates the game sprite based on my mouse input '''
+        
+        # Check if mouse is hovering over reset button
+        if self.game.resetButton.getRect().collidepoint(pg.mouse.get_pos()):
+            self.setImage(1)
+        else:
+            self.setImage(0)
+
 class Player(pg.sprite.Sprite):
     ''' This class defines the sprite the player controls in the game.'''
 
@@ -44,7 +103,7 @@ class Player(pg.sprite.Sprite):
         the image and rect attributes and other variables used for the player'''
 
         # Add itself to the general sprite group
-        self.groups = game.allSprites
+        self.groups = game.scoreSprites
         pg.sprite.Sprite.__init__(self, self.groups)
         
         
@@ -66,7 +125,11 @@ class Player(pg.sprite.Sprite):
         # 3 = respawning
         self.status = 1
         
-
+    def movetoCoordinate(self, x, y):
+        ''' Moves the player to a specific coordinate '''
+        self.x = x
+        self.y = y
+        
 
     def move(self, dx=0, dy=0):
         '''This method will move the player on the x, y coordinate based on the
@@ -78,11 +141,7 @@ class Player(pg.sprite.Sprite):
         # Update position
         self.x += dx
         self.y += dy
-            
-        # Update the scorekeeper
-        self.game.scoreKeeperTop.setCompleteTiles(self.game.scoreKeeperTop.getCompleteTiles() + 1)
-        self.game.scoreKeeperBottom.setScore(self.game.scoreKeeperBottom.getScore() + 1)
-            
+                        
         # Play the sound
         self.game.moveSound.play()
         
@@ -302,7 +361,10 @@ class ScoreKeeperBottom(pg.sprite.Sprite):
         self.font = pg.font.Font('font/arcade.ttf', 16)
         
         # Keeps track of the score
-        self.score = 0        
+        self.score = 0
+        
+        # Previous score from last stage
+        self.previousScore = 0;
         
         # The text that contains the score that constantly update
         self.message = "POINTS %-4d" % self.score
@@ -310,17 +372,25 @@ class ScoreKeeperBottom(pg.sprite.Sprite):
         
         # Set the position of the sprites
         self.rect = self.image.get_rect()
-        self.rect.centery = HEIGHT - 15
+        self.rect.centery = HEIGHT - 12
         self.rect.centerx = WIDTH - TILESIZE * 3
         
     
     def setScore(self, amount):
         ''' This method updates the current score '''
         self.score = amount
+
+    def setPreviousScore(self, amount):
+        ''' This method sets the previous score for storage in case of a reset '''
+        self.previousScore = amount
         
     def getScore(self):
         ''' This method returns the current score '''
         return self.score
+    
+    def getPreviousScore(self):
+        ''' This method returns the previous score '''
+        return self.previousScore
     
     def update(self):
         '''This method will be called automatically to display 
