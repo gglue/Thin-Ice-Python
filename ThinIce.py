@@ -36,7 +36,10 @@ class Game():
         self.endTile = object()
         
         # Checks if player has reset once on the map
-        self.resetOnce = True
+        self.resetOnce = False
+        
+        # Checks if the player has moved successfully
+        self.moved = False
            
         
     def loadData(self):
@@ -142,20 +145,53 @@ class Game():
 
     def events(self):
         '''This method handles the event handling'''
+        
+        # CONTROLS
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 pg.quit()
             if event.type == pg.KEYDOWN:
+                # Exits the game with the ESC key
                 if event.key == pg.K_ESCAPE:
                     self.quit()
+                    
+                # Arrow keys handle the moving
                 if event.key == pg.K_LEFT:
-                    self.player.move(dx=-1)
+                    if not self.player.collideWithWalls(dx=-1):
+                        self.player.move(dx=-1)
                 if event.key == pg.K_RIGHT:
-                    self.player.move(dx=1)
+                    if not self.player.collideWithWalls(dx=1):
+                        self.player.move(dx=1)
                 if event.key == pg.K_UP:
-                    self.player.move(dy=-1)
+                    if not self.player.collideWithWalls(dy=-1):
+                        self.player.move(dy=-1)
                 if event.key == pg.K_DOWN:
-                    self.player.move(dy=1)
+                    if not self.player.collideWithWalls(dy=1):
+                        self.player.move(dy=1)
+                        
+               
+        #If player moved, check if he's on the finish line
+        if self.moved:
+            if self.player.collideWithFinish():
+                print("you win")
+                
+                #Checks if bonus score can be applied
+                if self.scoreKeeperTop.checkFinish():
+                    # Gives x2 bonus score if no reset/death, otherwise give the normal score
+                    
+                    if not self.resetOnce:
+                        self.scoreKeeperBottom.setScore(self.scoreKeeperBottom.getScore() + self.scoreKeeperTop.getTotalTiles() * 2)
+                        
+                    else:
+                        self.scoreKeeperBottom.setScore(self.scoreKeeperBottom.getScore() + self.scoreKeeperTop.getTotalTiles())
+                               
+                    #game.nextLevel()
+            else:
+                print("moving")
+                
+            self.moved = False
+            
+        
 
 g = Game()
 while True:

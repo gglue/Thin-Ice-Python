@@ -71,25 +71,23 @@ class Player(pg.sprite.Sprite):
     def move(self, dx=0, dy=0):
         '''This method will move the player on the x, y coordinate based on the
         input '''
-        if not self.collideWithWalls(dx, dy):
             
-            # Create a water tile at the previous position
-            Water(self.game, self.x, self.y)
+        # Create a water tile at the previous position
+        Water(self.game, self.x, self.y)
             
-            # Update position
-            self.x += dx
-            self.y += dy
+        # Update position
+        self.x += dx
+        self.y += dy
             
-            # Update the scorekeeper
-            self.game.scoreKeeperTop.setCompleteTiles(self.game.scoreKeeperTop.getCompleteTiles() + 1)
-            self.game.scoreKeeperBottom.setScore(self.game.scoreKeeperBottom.getScore() + 1)
+        # Update the scorekeeper
+        self.game.scoreKeeperTop.setCompleteTiles(self.game.scoreKeeperTop.getCompleteTiles() + 1)
+        self.game.scoreKeeperBottom.setScore(self.game.scoreKeeperBottom.getScore() + 1)
             
-            # Play the sound
-            self.game.moveSound.play()
-            
-            # If reached finish line, update the score and load next map
-            self.collideWithFinish()
-            
+        # Play the sound
+        self.game.moveSound.play()
+        
+        # Lets the game know the player successfully moved
+        self.game.moved = True
             
 
     def update(self):
@@ -120,21 +118,10 @@ class Player(pg.sprite.Sprite):
     def collideWithFinish(self):
         ''' This method checks if the player has reached the finish line '''
         if self.game.endTile.x == self.x and self.game.endTile.y == self.y:
-            
-            #Checks if bonus score can be applied
-            if self.game.scoreKeeperTop.checkFinish():
-                # Gives x2 bonus score if no reset/death, otherwise give the normal score
-                
-                if not self.game.resetOnce:
-                    self.game.scoreKeeperBottom.setScore(self.game.scoreKeeperBottom.getScore() + self.game.scoreKeeperTop.getTotalTiles() * 2)
-                    
-                else:
-                    self.game.scoreKeeperBottom.setScore(self.game.scoreKeeperBottom.getScore() + self.game.scoreKeeperTop.getTotalTiles())
-                
-                #game.nextLevel()
-                
-
-        
+            return True
+        else:
+            return False
+  
 
 class Immovable(pg.sprite.Sprite):
     ''' This class represents a tile in the game that you won't be able to move through '''
