@@ -19,3 +19,7 @@ WATERXML = "images/water.xml"
 
 BLUE = (30, 45, 255)
 
+
+DYING = 1
+RESETTING = 16
+

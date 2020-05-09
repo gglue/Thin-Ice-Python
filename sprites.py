@@ -110,7 +110,7 @@ class Player(pg.sprite.Sprite):
         # Set the sprite's image and sets the rect attributes
         self.game = game
         
-        self.currentFrame = 1
+        self.currentFrame = 28
         self.image = self.game.playerSpriteSheet.get_image(self.currentFrame)
         self.image.set_colorkey(BLUE)
         self.rect = self.image.get_rect()
@@ -119,16 +119,15 @@ class Player(pg.sprite.Sprite):
         self.x = x
         self.y = y
         
-        #states to check the player's status
-        # 1 = alive
-        # 2 = dead
-        # 3 = respawning
-        self.status = 1
         
     def movetoCoordinate(self, x, y):
-        ''' Moves the player to a specific coordinate '''
+        ''' This method moves the player to a specific coordinate '''
         self.x = x
         self.y = y
+         
+    def setFrame(self, frameNumber):
+        ''' This method sets the current frame of animation '''
+        self.currentFrame = frameNumber     
         
 
     def move(self, dx=0, dy=0):
@@ -156,8 +155,11 @@ class Player(pg.sprite.Sprite):
         
         self.image = self.game.playerSpriteSheet.get_image(self.currentFrame)
         self.image.set_colorkey(BLUE)
-        if self.currentFrame == 54:
-            self.currentFrame = 1 
+        
+        # I would implement switch case but it doesn't exist in Python
+        # Changes the animation of the sprite based on status variable        
+        if self.currentFrame == 86:
+            self.currentFrame = 28 
         
         # Updates the position
         self.rect.x = self.x * TILESIZE
@@ -285,7 +287,7 @@ class ScoreKeeperTop(pg.sprite.Sprite):
         self.font = pg.font.Font('font/arcade.ttf', 16)
         
         # Set instance variables used to track score
-        self.currentLevel = 1
+        self.currentLevel = 0
         self.completeTiles = 0
         self.totalTiles = 0
         self.solvedLevels = 0
@@ -318,7 +320,12 @@ class ScoreKeeperTop(pg.sprite.Sprite):
         
     def getCompleteTiles(self):
         ''' This method returns the total number of complete tiles '''
-        return self.completeTiles            
+        return self.completeTiles
+    
+    def setCurrentLevel(self, amount):
+        ''' Sets the current level number for the HUD '''
+        self.currentLevel = amount
+        
         
         
     def checkFinish(self):

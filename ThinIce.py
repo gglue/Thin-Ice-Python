@@ -40,6 +40,9 @@ class Game():
         
         # Checks if the player has moved successfully
         self.moved = False
+        
+        # Contains the current level of the game
+        self.currentLevel = 1
               
     def loadData(self):
         '''This method loads data from files outside of Python'''
@@ -51,21 +54,33 @@ class Game():
         pg.mixer.music.set_volume(0.1)
         
         # Sound effect when a player moves
-        self.moveSound = pg.mixer.Sound("sound/move.mp3")
+        self.moveSound = pg.mixer.Sound("sound/move.wav")
         self.moveSound.set_volume(0.05)
         
         # Sound effect when a player finishs a level completely
-        self.allTileComplete = pg.mixer.Sound("sound/allTileComplete.mp3")
+        self.allTileComplete = pg.mixer.Sound("sound/allTileComplete.wav")
         self.allTileComplete.set_volume(0.05)
+
+        # Sound effect when a player dies
+        self.deadSound = pg.mixer.Sound("sound/dead.wav")
+        self.deadSound.set_volume(0.1)
+
+
+        # Sound effect when a player is resetted to the start
+        self.resetSound = pg.mixer.Sound("sound/reset.wav")
+        self.resetSound.set_volume(0.1)
         
     def loadMap(self):
-        '''Load the current level by reading a .txt '''
+        '''Load the current level by reading a parameter '''
         
         #Resets the map-related variables
         mapData = []
         totalFree = 1
+        
+        
         # Opens the file and appends all the data to mapData
-        currentMap = open("maps/levelOne.txt", "r")
+        fileName = "maps/level%d.txt" % self.currentLevel
+        currentMap = open(fileName, "r")
         for line in currentMap:
             mapData.append(line)
         
@@ -88,6 +103,10 @@ class Game():
         
         # subtracting the top row and bottom row free because they're meant for the menu lol            
         self.scoreKeeperTop.setTotalTiles(totalFree - (2*19))
+        self.scoreKeeperTop.setCompleteTiles(0)
+        # update current level number
+        self.scoreKeeperTop.setCurrentLevel(self.currentLevel)
+        
                     
 
 
@@ -142,19 +161,34 @@ class Game():
             
     def reset(self):
         ''' This method resets the current level '''
-        print("reset")
         
         # Empty out the map and reload the map
         self.walls.empty()
         self.movable.empty()
         self.loadMap()
         
+        # Play reset animation and play sound effect with it
+        self.player.setFrame(RESETTING)
+        self.deadSound.play()
+        self.resetSound.play()
+        
         # Reset the score to 0 or to previous level
         self.scoreKeeperBottom.setScore(self.scoreKeeperBottom.getPreviousScore())
-        self.scoreKeeperTop.setCompleteTiles(0)
         
         # Tells the game the player reset once
         self.resetOnce = True
+    
+    def nextLevel(self):
+        ''' This method moves the player to the next level '''
+        
+        #Updates variables
+        self.resetOnce = False
+        self.currentLevel += 1
+        
+        # Empty out the map and load new map
+        self.walls.empty()
+        self.movable.empty()
+        self.loadMap()        
             
     def draw(self):
         '''This method draws all the sprites onto the screen '''
@@ -206,7 +240,6 @@ class Game():
             self.scoreKeeperBottom.setScore(self.scoreKeeperBottom.getScore() + 1)            
             
             if self.player.collideWithFinish():
-                print("you win")
                 self.allTileComplete.play()
                 
                 #Checks if bonus score can be applied
@@ -222,8 +255,6 @@ class Game():
                         self.scoreKeeperBottom.setPreviousScore(self.scoreKeeperBottom.getScore())
                                
                     #game.nextLevel()
-            else:
-                print("moving")
                 
             self.moved = False
             
