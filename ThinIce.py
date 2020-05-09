@@ -294,7 +294,7 @@ class Game():
                 
             
             # If treasure bag exists, check if player touched treasure bag
-            elif self.lastLevelSolved:
+            elif self.lastLevelSolved and self.currentLevel > 3:
                 if  self.player.collideWithTreasure():
                     self.treasureTile.kill()
                     self.treasureSound.play()
