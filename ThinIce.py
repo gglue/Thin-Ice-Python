@@ -107,8 +107,6 @@ class Game():
         # update current level number
         self.scoreKeeperTop.setCurrentLevel(self.currentLevel)
         
-                    
-
 
     def new(self):
         '''This method initializes all the variables and sets up the game '''
@@ -158,13 +156,18 @@ class Game():
             pg.draw.line(self.screen, LIGHTGREY, (x, 0), (x, HEIGHT))
         for y in range(0, HEIGHT, TILESIZE):
             pg.draw.line(self.screen, LIGHTGREY, (0, y), (WIDTH, y))
+    
+    def deleteMap(self):
+        '''This method deletes all tiles in the current level '''
+        for tiles in self.allSprites:
+            tiles.kill()
             
+               
     def reset(self):
         ''' This method resets the current level '''
         
         # Empty out the map and reload the map
-        self.walls.empty()
-        self.movable.empty()
+        self.deleteMap()
         self.loadMap()
         
         # Play reset animation and play sound effect with it
@@ -186,8 +189,7 @@ class Game():
         self.currentLevel += 1
         
         # Empty out the map and load new map
-        self.walls.empty()
-        self.movable.empty()
+        self.deleteMap()
         self.loadMap()        
             
     def draw(self):
@@ -238,12 +240,16 @@ class Game():
             # Update the scorekeepers
             self.scoreKeeperTop.setCompleteTiles(self.scoreKeeperTop.getCompleteTiles() + 1)
             self.scoreKeeperBottom.setScore(self.scoreKeeperBottom.getScore() + 1)            
-            
+            print(len(self.allSprites))
             if self.player.collideWithFinish():
-                self.allTileComplete.play()
+                
                 
                 #Checks if bonus score can be applied
                 if self.scoreKeeperTop.checkFinish():
+                    
+                    # Plays the bonus sound effect
+                    self.allTileComplete.play()
+                    
                     # Gives x2 bonus score if no reset/death, otherwise give the normal score
                     
                     if not self.resetOnce:
@@ -253,8 +259,10 @@ class Game():
                     else:
                         self.scoreKeeperBottom.setScore(self.scoreKeeperBottom.getScore() + self.scoreKeeperTop.getTotalTiles())
                         self.scoreKeeperBottom.setPreviousScore(self.scoreKeeperBottom.getScore())
-                               
-                    #game.nextLevel()
+                    
+                    
+                self.scoreKeeperTop.setSolvedLevel(self.scoreKeeperTop.getSolvedLevel() + 1)  
+                self.nextLevel()
                 
             self.moved = False
             

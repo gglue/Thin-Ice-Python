@@ -324,9 +324,7 @@ class ScoreKeeperTop(pg.sprite.Sprite):
     
     def setCurrentLevel(self, amount):
         ''' Sets the current level number for the HUD '''
-        self.currentLevel = amount
-        
-        
+        self.currentLevel = amount    
         
     def checkFinish(self):
         ''' This method checks if the player has finished the level by passing all tiles '''
@@ -337,9 +335,13 @@ class ScoreKeeperTop(pg.sprite.Sprite):
         ''' This method lets the scoreboard know the current level'''
         self.currentLevel = amount
         
-    def setSolvedLevels(self, amount):
+    def setSolvedLevel(self, amount):
         ''' This method lets the scoreboard know the number of solved levels'''
         self.solvedLevels = amount
+        
+    def getSolvedLevel(self):
+        ''' This method returns the total number of solved levels '''
+        return self.solvedLevels
     
     def update(self):
         '''This method will be called automatically to display 
