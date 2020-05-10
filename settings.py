@@ -16,6 +16,8 @@ PLAYERSPRITE = "images/player.png"
 PLAYERXML = "images/player.xml"
 WATERSPRITE = "images/water.png"
 WATERXML = "images/water.xml"
+KEYSPRITE = "images/key.png"
+KEYXML = "images/key.xml"
 
 BLUE = (30, 45, 255)
 
@@ -24,4 +26,4 @@ DYING = 1
 RESETTING = 16
 
 TREASURELEVEL = 3
-
+KEYLEVEL = 9

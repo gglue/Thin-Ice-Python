@@ -35,6 +35,8 @@ class Game():
         # Contains the end point of each level for event handling
         self.endTile = object()
         
+        # Checks if player can open a key socket
+        self.hasKey = False
 
         # Checks if player has reset once on the map
         self.resetOnce = False
@@ -43,15 +45,16 @@ class Game():
         self.moved = False
         
         # Contains the current level of the game
-        self.currentLevel = 7
+        self.currentLevel = 12
         
         # Lets game remember last level you solved it
-        self.lastLevelSolved = False
+        self.lastLevelSolved = True
               
     def loadData(self):
         '''This method loads data from files outside of Python'''
         self.playerSpriteSheet = Spritesheet(PLAYERSPRITE, PLAYERXML)
         self.waterSpriteSheet = Spritesheet(WATERSPRITE, WATERXML)
+        self.keySpriteSheet = Spritesheet(KEYSPRITE, KEYXML)
         
         # Loads the Background music
         pg.mixer.music.load('sound/music.mp3')
@@ -76,6 +79,10 @@ class Game():
         # Sound effect when a player moves away from an ice tile
         self.iceBreakSound = pg.mixer.Sound("sound/breakIce.wav")
         self.iceBreakSound.set_volume(0.1)
+        
+        # Sound effect when a player touches a key or unlocks a key socket
+        self.keyGet = pg.mixer.Sound("sound/keyGet.wav")
+        self.keyGet.set_volume(0.1)
 
         # Sound effect when a player is resetted to the start
         self.resetSound = pg.mixer.Sound("sound/reset.wav")
@@ -86,7 +93,7 @@ class Game():
         
         #Resets the map-related variables
         mapData = []
-        totalFree = 1
+        totalFree = 0
         
         
         # Opens the file and appends all the data to mapData
@@ -111,6 +118,13 @@ class Game():
                 elif tile == 'I':
                     Ice(self, col, row)
                     totalFree +=2
+                elif tile == 'K':
+                    Free(self, col, row)
+                    self.key = GoldenKey(self, col, row)
+                    totalFree +=1
+                elif tile == 'H':
+                    self.keyHole = KeyHole(self, col, row)
+                    totalFree += 1
                 elif tile == 'M':
                     Free(self, col, row)
                     if (self.lastLevelSolved):
@@ -119,6 +133,7 @@ class Game():
                 elif tile == 'P':
                     Free(self, col, row)
                     self.player.movetoCoordinate(col,row)
+                    totalFree += 1
         
         # subtracting the top row and bottom row free because they're meant for the menu lol            
         self.scoreKeeperTop.setTotalTiles(totalFree - (2*19))
@@ -199,6 +214,9 @@ class Game():
         # Reset the score to 0 or to previous level
         self.scoreKeeperBottom.setScore(self.scoreKeeperBottom.getPreviousScore())
         
+        # Reset key status
+        self.hasKey = False
+        
         # Tells the game the player reset once
         self.resetOnce = True
     
@@ -255,14 +273,13 @@ class Game():
                
         #If player moved, check if he's on the finish line
         if self.moved:
-            
-            
+                               
             # Update the scorekeepers
             self.scoreKeeperTop.setCompleteTiles(self.scoreKeeperTop.getCompleteTiles() + 1)
             self.scoreKeeperBottom.setScore(self.scoreKeeperBottom.getScore() + 1)
             
             # Check if player touched the finish line yet
-            if self.player.collideWithFinish():
+            if self.player.collideWithTile(self.endTile):
                 
                 
                 # Checks if bonus score can be applied
@@ -299,24 +316,42 @@ class Game():
             
             # If treasure bag exists, check if player touched treasure bag, treasure only appears after level 3 in original game
             elif self.lastLevelSolved and self.currentLevel > TREASURELEVEL:
-                if  self.player.collideWithTreasure():
+                if  self.player.collideWithTile(self.treasureTile):
                     self.treasureTile.kill()
                     self.treasureSound.play()
                     self.scoreKeeperBottom.setScore(self.scoreKeeperBottom.getScore() + 100)
             
+            # Check if player touches key, only appears after level 9 in the original game        
+            if self.currentLevel > KEYLEVEL:
+                if self.player.collideWithTile(self.key):
+                    # Lets player open key sockets now
+                    self.key.kill()
+                    
+                    self.keyGet.play()
+                    self.hasKey = True
+            print (len(self.allSprites))  
+            
+            
+            # If the player currently has the key, check if he's in the radius of the keyhole
+            if self.hasKey:
+                if self.player.nearKeyHole():
+                    #Delete the keyhole and replace with a free tile
+                    Free(self, self.keyHole.x, self.keyHole.y)
+                    self.keyGet.play()
+                    self.keyHole.kill()
+                    self.hasKey = False
             
             # Checks if the player is unable to move anymore, continued
             # explaination in Player class
             if self.player.checkDeath():
                 # Play death animation and sounds and reset the map when hitting the button
                 self.player.setFrame(DYING)
-                self.playResetSounds()
-            
-            
+                self.playResetSounds()            
+                        
             # Reset moved variable
             self.moved = False
             
-        
+            
 
 g = Game()
 while True:

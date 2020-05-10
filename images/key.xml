@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with TexturePacker https://www.codeandweb.com/texturepacker -->
+<!-- $TexturePacker:SmartUpdate:6aa32eadd986dc52af82104a0209e721:2d5794c246f1d3cea136cbb873ebd721:810f054cdb5b06de8d614d6bf0616bcb$ -->
+<!--Format:
+name  => name of the sprite
+x  => sprite x pos in texture
+y  => sprite y pos in texture
+w  => sprite width (may be trimmed)
+h  => sprite height (may be trimmed)
+pX => x pos of the pivot point (relative to sprite width)
+pY => y pos of the pivot point (relative to sprite height)
+oX => sprite's x-corner offset (only available if trimmed)
+oY => sprite's y-corner offset (only available if trimmed)
+oW => sprite's original width (only available if trimmed)
+oH => sprite's original height (only available if trimmed)
+r => 'y' only set if sprite is rotated
+with polygon mode enabled:
+vertices   => points in sprite coordinate system (x0,y0,x1,y1,x2,y2, ...)
+verticesUV => points in sheet coordinate system (x0,y0,x1,y1,x2,y2, ...)
+triangles  => sprite triangulation, 3 vertex indices per triangle
+-->
+<TextureAtlas imagePath="key.png" width="286" height="15">
+    <sprite name="1.png" x="1" y="1" w="23" h="13"/>
+    <sprite name="2.png" x="1" y="1" w="23" h="13"/>
+    <sprite name="3.png" x="95" y="1" w="20" h="13" oX="1" oY="0" oW="23" oH="13"/>
+    <sprite name="4.png" x="95" y="1" w="20" h="13" oX="1" oY="0" oW="23" oH="13"/>
+    <sprite name="5.png" x="193" y="1" w="16" h="13" oX="3" oY="0" oW="23" oH="13"/>
+    <sprite name="6.png" x="193" y="1" w="16" h="13" oX="3" oY="0" oW="23" oH="13"/>
+    <sprite name="7.png" x="253" y="1" w="12" h="13" oX="5" oY="0" oW="23" oH="13"/>
+    <sprite name="8.png" x="253" y="1" w="12" h="13" oX="5" oY="0" oW="23" oH="13"/>
+    <sprite name="9.png" x="267" y="1" w="8" h="13" oX="7" oY="0" oW="23" oH="13"/>
+    <sprite name="10.png" x="267" y="1" w="8" h="13" oX="7" oY="0" oW="23" oH="13"/>
+    <sprite name="11.png" x="211" y="1" w="12" h="13" oX="5" oY="0" oW="23" oH="13"/>
+    <sprite name="12.png" x="211" y="1" w="12" h="13" oX="5" oY="0" oW="23" oH="13"/>
+    <sprite name="13.png" x="139" y="1" w="16" h="13" oX="3" oY="0" oW="23" oH="13"/>
+    <sprite name="14.png" x="139" y="1" w="16" h="13" oX="3" oY="0" oW="23" oH="13"/>
+    <sprite name="15.png" x="51" y="1" w="20" h="13" oX="1" oY="0" oW="23" oH="13"/>
+    <sprite name="16.png" x="51" y="1" w="20" h="13" oX="1" oY="0" oW="23" oH="13"/>
+    <sprite name="17.png" x="26" y="1" w="23" h="13"/>
+    <sprite name="18.png" x="26" y="1" w="23" h="13"/>
+    <sprite name="19.png" x="73" y="1" w="20" h="13" oX="1" oY="0" oW="23" oH="13"/>
+    <sprite name="20.png" x="73" y="1" w="20" h="13" oX="1" oY="0" oW="23" oH="13"/>
+    <sprite name="21.png" x="157" y="1" w="16" h="13" oX="3" oY="0" oW="23" oH="13"/>
+    <sprite name="22.png" x="157" y="1" w="16" h="13" oX="3" oY="0" oW="23" oH="13"/>
+    <sprite name="23.png" x="225" y="1" w="12" h="13" oX="5" oY="0" oW="23" oH="13"/>
+    <sprite name="24.png" x="225" y="1" w="12" h="13" oX="5" oY="0" oW="23" oH="13"/>
+    <sprite name="25.png" x="277" y="1" w="8" h="13" oX="7" oY="0" oW="23" oH="13"/>
+    <sprite name="26.png" x="277" y="1" w="8" h="13" oX="7" oY="0" oW="23" oH="13"/>
+    <sprite name="27.png" x="239" y="1" w="12" h="13" oX="5" oY="0" oW="23" oH="13"/>
+    <sprite name="28.png" x="239" y="1" w="12" h="13" oX="5" oY="0" oW="23" oH="13"/>
+    <sprite name="29.png" x="175" y="1" w="16" h="13" oX="3" oY="0" oW="23" oH="13"/>
+    <sprite name="30.png" x="175" y="1" w="16" h="13" oX="3" oY="0" oW="23" oH="13"/>
+    <sprite name="31.png" x="117" y="1" w="20" h="13" oX="1" oY="0" oW="23" oH="13"/>
+    <sprite name="32.png" x="117" y="1" w="20" h="13" oX="1" oY="0" oW="23" oH="13"/>
+</TextureAtlas>

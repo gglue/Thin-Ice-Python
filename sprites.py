@@ -205,19 +205,25 @@ class Player(pg.sprite.Sprite):
         # Allow player to move if theres nothing blocking
         return False
     
-    def collideWithFinish(self):
-        ''' This method checks if the player has reached the finish line '''
-        if self.game.endTile.x == self.x and self.game.endTile.y == self.y:
+    def collideWithTile(self, tile):
+        ''' This method checks if the player is in the same tile as the parameter '''
+        if tile.x == self.x and tile.y == self.y:
             return True
         else:
             return False
+
+    def nearKeyHole(self):
+        ''' This method checks if the player is near the keyhole '''
         
-    def collideWithTreasure(self):
-        ''' This method checks if the player has touched a treasure bag '''
-        if self.game.treasureTile.x == self.x and self.game.treasureTile.y == self.y:
+        if self.game.keyHole.x == self.x - 1 and self.game.keyHole.y == self.y + 0:
             return True
-        else:
-            return False
+        elif self.game.keyHole.x == self.x + 1 and self.game.keyHole.y == self.y + 0:
+            return True
+        elif self.game.keyHole.x == self.x + 0 and self.game.keyHole.y == self.y - 1:
+            return True
+        elif self.game.keyHole.x == self.x + 0 and self.game.keyHole.y == self.y + 1:
+            return True
+        return False
         
     def checkDeath(self):
         ''' This method checks if the player is stuck '''
@@ -261,6 +267,12 @@ class Immovable(pg.sprite.Sprite):
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
         
+class KeyHole(Immovable):
+    ''' This class represents a key socket tile that can be opened when the player has a key '''
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y)
+        
+        self.image = pg.image.load("images/socket.png")    
         
 class Wall(Immovable):
     ''' This class represents a wall in game '''
@@ -345,6 +357,30 @@ class Treasure(Item):
         
         self.image = pg.image.load("images/treasure.png")
         self.image.set_colorkey((255,255,255))
+        
+class GoldenKey(Item):
+    '''  This class represents a key used in the game to unlock a socket '''
+    
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y)
+        
+        self.currentFrame = 1
+        self.image = self.game.keySpriteSheet.get_image(self.currentFrame)
+        self.image.set_colorkey(BLUE)
+        
+
+    def update(self):
+        '''Updates the player sprite '''
+        
+        self.currentFrame += 1
+        
+        self.image = self.game.keySpriteSheet.get_image(self.currentFrame)
+        self.image.set_colorkey(BLUE)
+        
+        # Never play initial animation after creation
+        if self.currentFrame == 32:
+            self.currentFrame = 1
+        
 
 class Ice(pg.sprite.Sprite):
     ''' This class represents an ice tile in game '''
