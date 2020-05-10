@@ -43,7 +43,7 @@ class Game():
         self.moved = False
         
         # Contains the current level of the game
-        self.currentLevel = 1
+        self.currentLevel = 7
         
         # Lets game remember last level you solved it
         self.lastLevelSolved = False
@@ -72,6 +72,10 @@ class Game():
         # Sound effect when a player touches a treasure bag
         self.treasureSound = pg.mixer.Sound("sound/treasure.wav")
         self.treasureSound.set_volume(0.1)
+
+        # Sound effect when a player moves away from an ice tile
+        self.iceBreakSound = pg.mixer.Sound("sound/breakIce.wav")
+        self.iceBreakSound.set_volume(0.1)
 
         # Sound effect when a player is resetted to the start
         self.resetSound = pg.mixer.Sound("sound/reset.wav")
@@ -104,6 +108,9 @@ class Game():
                     totalFree += 1
                 elif tile == 'E':
                     self.endTile = End(self, col, row)
+                elif tile == 'I':
+                    Ice(self, col, row)
+                    totalFree +=2
                 elif tile == 'M':
                     Free(self, col, row)
                     if (self.lastLevelSolved):
@@ -131,6 +138,7 @@ class Game():
         self.walls = pg.sprite.Group()
         self.movable = pg.sprite.Group()
         self.items = pg.sprite.Group()
+        self.iceSprites = pg.sprite.Group()
         self.scoreSprites = pg.sprite.Group()
         
         # Currents the player sprite before the map loading
@@ -221,7 +229,6 @@ class Game():
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 pg.quit()
-                
             if event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1 and self.resetButton.rect.collidepoint(pg.mouse.get_pos()):
                     # Play reset animation and sounds and reset the map when hitting the button
@@ -237,21 +244,18 @@ class Game():
                     
                 # Arrow keys handle the moving
                 if event.key == pg.K_LEFT:
-                    if not self.player.collideWithWalls(dx=-1):
-                        self.player.move(dx=-1)
+                    self.player.checkAndMove(dx=-1)
                 if event.key == pg.K_RIGHT:
-                    if not self.player.collideWithWalls(dx=1):
-                        self.player.move(dx=1)
+                    self.player.checkAndMove(dx=1)
                 if event.key == pg.K_UP:
-                    if not self.player.collideWithWalls(dy=-1):
-                        self.player.move(dy=-1)
+                    self.player.checkAndMove(dy=-1)
                 if event.key == pg.K_DOWN:
-                    if not self.player.collideWithWalls(dy=1):
-                        self.player.move(dy=1)
+                    self.player.checkAndMove(dy=1)
                         
                
         #If player moved, check if he's on the finish line
         if self.moved:
+            
             
             # Update the scorekeepers
             self.scoreKeeperTop.setCompleteTiles(self.scoreKeeperTop.getCompleteTiles() + 1)
@@ -289,12 +293,12 @@ class Game():
                 else:
                     self.lastLevelSolved = False
                 
-                # Go to the next level 
+                # Go to the next level
                 self.nextLevel()
                 
             
-            # If treasure bag exists, check if player touched treasure bag
-            elif self.lastLevelSolved and self.currentLevel > 3:
+            # If treasure bag exists, check if player touched treasure bag, treasure only appears after level 3 in original game
+            elif self.lastLevelSolved and self.currentLevel > TREASURELEVEL:
                 if  self.player.collideWithTreasure():
                     self.treasureTile.kill()
                     self.treasureSound.play()

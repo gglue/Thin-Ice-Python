@@ -132,14 +132,10 @@ class Player(pg.sprite.Sprite):
     def getFrame(self):
         ''' This method gets the current frame of animation '''
         return self.currentFrame
-        
-
+    
     def move(self, dx=0, dy=0):
         '''This method will move the player on the x, y coordinate based on the
         input '''
-            
-        # Create a water tile at the previous position
-        Water(self.game, self.x, self.y)
             
         # Update position
         self.x += dx
@@ -151,6 +147,14 @@ class Player(pg.sprite.Sprite):
         # Lets the game know the player successfully moved
         self.game.moved = True
             
+    def checkAndMove(self, dx=0, dy=0):
+        ''' This method combines multiple other methods for better readability in the main program '''
+        if not self.collideWithWalls(dx,dy):
+            if self.checkMakeWater():
+                Water(self.game, self.x, self.y)
+            self.move(dx,dy)
+                
+               
 
     def update(self):
         '''This method updates the player sprite '''
@@ -174,6 +178,21 @@ class Player(pg.sprite.Sprite):
         # Updates the position
         self.rect.x = self.x * TILESIZE
         self.rect.y = self.y * TILESIZE
+    
+    def checkMakeWater(self):
+        ''' This method checks if the game should make a water tile in the player's previous position '''
+        
+        for ice in self.game.iceSprites:
+            # If player was on an ice block, kill it, spawn a Free tile on it instead and play the sound effect
+            if ice.x == self.x and ice.y == self.y:
+                ice.kill()
+                Free(self.game, self.x, self.y)
+                self.game.iceBreakSound.play()
+                return False
+            
+        # Return True if not on an ice block
+        return True
+    
         
     def collideWithWalls(self, dx=0, dy=0):
         ''' This method checks if the player has collison with any walls '''
@@ -327,6 +346,19 @@ class Treasure(Item):
         self.image = pg.image.load("images/treasure.png")
         self.image.set_colorkey((255,255,255))
 
+class Ice(pg.sprite.Sprite):
+    ''' This class represents an ice tile in game '''
+    
+    def __init__(self, game, x, y):
+        self.groups = game.iceSprites, game.allSprites
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.image = pg.image.load("images/ice.png")
+        self.rect = self.image.get_rect()
+        self.x = x
+        self.y = y
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
+       
         
 class Unused(pg.sprite.Sprite):
     ''' This class represents an unused tile in game '''
