@@ -18,6 +18,8 @@ WATERSPRITE = "images/water.png"
 WATERXML = "images/water.xml"
 KEYSPRITE = "images/key.png"
 KEYXML = "images/key.xml"
+TELEPORTERSPRITE = "images/teleporter.png"
+TELEPORTERXML = "images/teleporter.xml"
 
 BLUE = (30, 45, 255)
 
@@ -28,3 +30,4 @@ RESETTING = 16
 TREASURELEVEL = 3
 KEYLEVEL = 9
 MOVINGBLOCKLEVEL = 12
+TELEPORTLEVEL = 16

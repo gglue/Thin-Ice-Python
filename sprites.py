@@ -167,15 +167,15 @@ class Player(pg.sprite.Sprite):
             
             # If the player is not near a moving block, just do the normal collison check                        
             else:
-                if not self.collideWithWalls(dx,dy):
-                    if self.checkMakeWater() and not self.collideWithTile(self.game.movingBlockTile):
+                if not self.collideWithGroup(self.game.walls, dx, dy):
+                    if self.checkMakeWater() and not self.collideWithGroup(self.game.noWaterGroup, 0, 0):
                         Water(self.game, self.x, self.y)
                     self.move(dx,dy)                    
         
         
         # When it's the earlier levels, just check if the player is colliding with a wall
-        elif not self.collideWithWalls(dx,dy):
-            if self.checkMakeWater() and not self.collideWithTile(self.game.movingBlockTile):
+        elif not self.collideWithGroup(self.game.walls, dx, dy):
+            if self.checkMakeWater() and not self.collideWithGroup(self.game.noWaterGroup, 0, 0):
                 Water(self.game, self.x, self.y)
             self.move(dx,dy)
                          
@@ -202,6 +202,7 @@ class Player(pg.sprite.Sprite):
         self.rect.x = self.x * TILESIZE
         self.rect.y = self.y * TILESIZE
     
+    
     def checkMakeWater(self):
         ''' This method checks if the game should make a water tile in the player's previous position '''
         
@@ -217,12 +218,12 @@ class Player(pg.sprite.Sprite):
         return True
     
         
-    def collideWithWalls(self, dx=0, dy=0):
-        ''' This method checks if the player has collison with any walls '''
-        
-        # Checks all the wall entities
-        for wall in self.game.walls:
-            if wall.x == self.x + dx and wall.y == self.y + dy:
+    def collideWithGroup(self, nameOfGroup, dx=0, dy=0):
+        ''' This method checks if the player has collison with a group's entities '''
+ 
+        # Checks all the group's entities
+        for entity in nameOfGroup:
+            if entity.x == self.x + dx and entity.y == self.y + dy:
                 return True
                
         # Allow player to move if theres nothing blocking
@@ -230,6 +231,8 @@ class Player(pg.sprite.Sprite):
     
     def collideWithTile(self, tile):
         ''' This method checks if the player is in the same tile as the parameter '''
+        
+        # True if on the same tile
         if tile.x == self.x and tile.y == self.y:
             return True
         else:
@@ -439,19 +442,52 @@ class Unused(pg.sprite.Sprite):
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
         self.image.set_colorkey((0,0,0))
-        
-class MovingBlockTile(pg.sprite.Sprite):
-    ''' This class defines a tile that indicates the location of where the moving block should be in game '''
+
+class noWaterTile(pg.sprite.Sprite):
+    ''' This class defines a tile where water will not be created when the player leaves the tile '''
     def __init__(self, game, x, y):
-        self.groups = game.allSprites
+        self.groups = game.allSprites, game.noWaterGroup
         pg.sprite.Sprite.__init__(self, self.groups)
-        self.image = pg.image.load("images/movingBlockTile.png")
+        self.game = game
+        self.image = pg.Surface((TILESIZE, TILESIZE))
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
-        self.image.set_colorkey((0,0,0))
+        
+class MovingBlockTile(noWaterTile):
+    ''' This class defines a tile that indicates the location of where the moving block should be in game '''
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y)
+        
+        self.image = pg.image.load("images/movingBlockTile.png")
+        self.image.set_colorkey((255,255,255))
+        
+class Teleporter(noWaterTile):
+    ''' This class defines a tile that teleports you to another teleporter  '''
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y)
+        
+        
+        self.currentFrame = 1
+        self.image = self.game.teleporterSpriteSheet.get_image(self.currentFrame)
+             
+    def update(self):
+        '''Updates the player sprite '''
+        
+        if self.currentFrame < 21 and self.game.canTeleport == True:
+            self.currentFrame += 1
+            
+        self.image = self.game.teleporterSpriteSheet.get_image(self.currentFrame)
+            
+        if self.currentFrame >= 21 and self.game.canTeleport == True:
+            self.currentFrame = 1
+            
+        if not self.game.canTeleport:
+            self.currentFrame = 22
+        
+                 
         
 class MovingBlock(pg.sprite.Sprite):
     ''' This class defines a block that is pushed by the player '''
@@ -488,6 +524,15 @@ class MovingBlock(pg.sprite.Sprite):
         ''' This function moves the block '''
         self.x += dx
         self.y += dy
+
+    def collideWithTile(self, tile):
+        ''' This method checks if the player is in the same tile as the parameter '''
+        
+        # True if on the same tile
+        if tile.x == self.x and tile.y == self.y:
+            return True
+        else:
+            return False
         
     def setVelocity(self, dx, dy):
         ''' This function sets the velocity of the block '''
@@ -495,13 +540,25 @@ class MovingBlock(pg.sprite.Sprite):
         self.dx = dx
         self.dy = dy
         
+    def movetoCoordinate(self, x, y):
+        ''' This method moves the player to a specific coordinate '''
+        self.x = x
+        self.y = y
+        
     def update(self):
         ''' This method updates the blocks' position '''
         
         tempBoolean = self.collideWithWalls()
         
+        # Move the block if the game says the block is moving
         if not tempBoolean and self.game.blockIsMoving:
             self.move(self.dx, self.dy)
+
+        # Teleport if it touches a teleporter
+        if self.collideWithTile(self.game.secondTeleporter):
+            if self.game.canTeleport:
+                self.game.movingBlock.movetoCoordinate(self.game.firstTeleporter.x, self.game.firstTeleporter.y)
+                self.game.teleportSound.play()        
             
         # Updates the position
         self.rect.x = self.x * TILESIZE

@@ -48,19 +48,23 @@ class Game():
         self.moved = False
         
         # Contains the current level of the game
-        self.currentLevel = 16
+        self.currentLevel = 1
         
         # Lets game remember last level you solved it
         self.lastLevelSolved = True
         
         # Checks if the moving block is moving
         self.blockIsMoving = False
+        
+        # Checks if the player can still teleport
+        self.canTeleport = True
               
     def loadData(self):
         '''This method loads data from files outside of Python'''
         self.playerSpriteSheet = Spritesheet(PLAYERSPRITE, PLAYERXML)
         self.waterSpriteSheet = Spritesheet(WATERSPRITE, WATERXML)
         self.keySpriteSheet = Spritesheet(KEYSPRITE, KEYXML)
+        self.teleporterSpriteSheet = Spritesheet(TELEPORTERSPRITE, TELEPORTERXML)
         
         # Loads the Background music
         pg.mixer.music.load('sound/music.mp3')
@@ -96,7 +100,11 @@ class Game():
         
         # Sound effect when a player hits a moving block
         self.movingBlockSound = pg.mixer.Sound("sound/movingBlockSound.wav")
-        self.movingBlockSound.set_volume(0.1)        
+        self.movingBlockSound.set_volume(0.1)
+        
+        # Sound effect when a player teleports
+        self.teleportSound = pg.mixer.Sound("sound/teleportSound.wav")
+        self.teleportSound.set_volume(0.1)
         
     def loadMap(self):
         '''Load the current level by reading a parameter '''
@@ -152,6 +160,12 @@ class Game():
                     Ice(self, col, row)
                     self.key = GoldenKey(self, col, row)
                     totalFree += 2
+                elif tile == '1':
+                    # teleporter 1
+                    self.firstTeleporter = Teleporter(self, col, row)
+                elif tile == '2':
+                    # teleporter 2
+                    self.secondTeleporter = Teleporter(self, col, row)
                 elif tile == 'H':
                     self.keyHole = KeyHole(self, col, row)
                     totalFree += 1
@@ -186,6 +200,7 @@ class Game():
         self.iceSprites = pg.sprite.Group()
         self.scoreSprites = pg.sprite.Group()
         self.updatingBlockGroup = pg.sprite.Group()
+        self.noWaterGroup = pg.sprite.Group()
         
         # Currents the player sprite before the map loading
         self.player = Player(self, 0, 0)
@@ -250,8 +265,12 @@ class Game():
         # Reset key status
         self.hasKey = False
         
+        # Reset teleporter status
+        self.canTeleport = True
+        
         # Tells the game the player reset once
         self.resetOnce = True
+        
     
     def nextLevel(self):
         ''' This method moves the player to the next level '''
@@ -307,7 +326,7 @@ class Game():
                
         #If player moved, check if he's on the finish line
         if self.moved:
-                               
+            print(len(self.allSprites))
             # Update the scorekeepers
             self.scoreKeeperTop.setCompleteTiles(self.scoreKeeperTop.getCompleteTiles() + 1)
             self.scoreKeeperBottom.setScore(self.scoreKeeperBottom.getScore() + 1)
@@ -349,7 +368,7 @@ class Game():
                 
             
             # If treasure bag exists, check if player touched treasure bag, treasure only appears after level 3 in original game
-            elif self.lastLevelSolved and self.currentLevel > TREASURELEVEL:
+            elif self.lastLevelSolved and self.currentLevel > TREASURELEVEL and self.currentLevel != 19:
                 if  self.player.collideWithTile(self.treasureTile):
                     self.treasureTile.kill()
                     self.treasureSound.play()
@@ -360,7 +379,6 @@ class Game():
                 if self.player.collideWithTile(self.key):
                     # Lets player open key sockets now
                     self.key.kill()
-                    
                     self.keyGet.play()
                     self.hasKey = True
             
@@ -373,6 +391,37 @@ class Game():
                     self.keyGet.play()
                     self.keyHole.kill()
                     self.hasKey = False
+                    
+            # Checks if the player is able to teleport, only after level 16
+            if self.currentLevel > TELEPORTLEVEL:
+                    # Teleports to you to the other teleporter, make sure not to add score as well
+                    if self.player.collideWithTile(self.firstTeleporter):
+                        self.scoreKeeperTop.setCompleteTiles(self.scoreKeeperTop.getCompleteTiles() - 1)
+                        self.scoreKeeperBottom.setScore(self.scoreKeeperBottom.getScore() - 1) 
+                        
+                        if self.canTeleport:
+                            self.player.movetoCoordinate(self.secondTeleporter.x, self.secondTeleporter.y)
+                            self.canTeleport = False
+
+                            self.teleportSound.play()
+                        
+                    elif self.player.collideWithTile(self.secondTeleporter):
+                        self.scoreKeeperTop.setCompleteTiles(self.scoreKeeperTop.getCompleteTiles() - 1)
+                        self.scoreKeeperBottom.setScore(self.scoreKeeperBottom.getScore() - 1)
+                        
+                        if self.canTeleport:
+                            self.player.movetoCoordinate(self.firstTeleporter.x, self.firstTeleporter.y)
+                            self.canTeleport = False
+
+                            self.teleportSound.play()
+                            
+                
+                        
+                        
+            # If the player collided with the moving block tile, don't add score
+            if self.currentLevel > MOVINGBLOCKLEVEL and self.player.collideWithTile(self.movingBlockTile):
+                self.scoreKeeperTop.setCompleteTiles(self.scoreKeeperTop.getCompleteTiles() - 1)
+                self.scoreKeeperBottom.setScore(self.scoreKeeperBottom.getScore() - 1)                
             
             # Checks if the player is unable to move anymore, continued
             # explaination in Player class
