@@ -35,6 +35,9 @@ class Game():
         # Contains the end point of each level for event handling
         self.endTile = object()
         
+        # Tells where to move the moving block later
+        self.movingBlockTile = object()
+        
         # Checks if player can open a key socket
         self.hasKey = False
 
@@ -45,10 +48,13 @@ class Game():
         self.moved = False
         
         # Contains the current level of the game
-        self.currentLevel = 12
+        self.currentLevel = 16
         
         # Lets game remember last level you solved it
         self.lastLevelSolved = True
+        
+        # Checks if the moving block is moving
+        self.blockIsMoving = False
               
     def loadData(self):
         '''This method loads data from files outside of Python'''
@@ -88,6 +94,10 @@ class Game():
         self.resetSound = pg.mixer.Sound("sound/reset.wav")
         self.resetSound.set_volume(0.1)
         
+        # Sound effect when a player hits a moving block
+        self.movingBlockSound = pg.mixer.Sound("sound/movingBlockSound.wav")
+        self.movingBlockSound.set_volume(0.1)        
+        
     def loadMap(self):
         '''Load the current level by reading a parameter '''
         
@@ -122,6 +132,26 @@ class Game():
                     Free(self, col, row)
                     self.key = GoldenKey(self, col, row)
                     totalFree +=1
+                elif tile == 'B':
+                    self.movingBlockTile = MovingBlockTile(self, col, row)
+                elif tile == 'T':
+                    Free(self, col, row)
+                    self.movingBlock = MovingBlock(self, col, row)     
+                    totalFree += 1
+                elif tile == '%':
+                    # exclusive tile only used for level 14,15,16
+                    Ice(self, col, row)
+                    self.movingBlock = MovingBlock(self,col,row)
+                    totalFree += 2
+                elif tile == '&':
+                    # exclusive tile only used for level 15
+                    self.movingBlockTile = MovingBlockTile(self, col, row)
+                    self.key = GoldenKey(self, col, row)
+                elif tile == '!':
+                    # exclusive tile only used for level 16
+                    Ice(self, col, row)
+                    self.key = GoldenKey(self, col, row)
+                    totalFree += 2
                 elif tile == 'H':
                     self.keyHole = KeyHole(self, col, row)
                     totalFree += 1
@@ -155,9 +185,12 @@ class Game():
         self.items = pg.sprite.Group()
         self.iceSprites = pg.sprite.Group()
         self.scoreSprites = pg.sprite.Group()
+        self.updatingBlockGroup = pg.sprite.Group()
         
         # Currents the player sprite before the map loading
-        self.player = Player(self, 0, 0)        
+        self.player = Player(self, 0, 0)
+        
+        
         
         self.scoreKeeperTop = ScoreKeeperTop(self)
         self.scoreKeeperBottom = ScoreKeeperBottom(self)
@@ -237,6 +270,7 @@ class Game():
         #self.drawGrid()
         self.allSprites.draw(self.screen)
         self.scoreSprites.draw(self.screen)
+        self.updatingBlockGroup.draw(self.screen)
         pg.display.flip()
               
 
@@ -329,12 +363,11 @@ class Game():
                     
                     self.keyGet.play()
                     self.hasKey = True
-            print (len(self.allSprites))  
             
             
             # If the player currently has the key, check if he's in the radius of the keyhole
             if self.hasKey:
-                if self.player.nearKeyHole():
+                if self.player.nearTile(self.keyHole) != 0:
                     #Delete the keyhole and replace with a free tile
                     Free(self, self.keyHole.x, self.keyHole.y)
                     self.keyGet.play()
@@ -350,6 +383,7 @@ class Game():
                         
             # Reset moved variable
             self.moved = False
+    
             
             
 

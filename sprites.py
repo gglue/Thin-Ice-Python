@@ -149,13 +149,36 @@ class Player(pg.sprite.Sprite):
             
     def checkAndMove(self, dx=0, dy=0):
         ''' This method combines multiple other methods for better readability in the main program '''
-        if not self.collideWithWalls(dx,dy):
-            if self.checkMakeWater():
+                
+        # Only start checking when the moving block is active, move the moving block when the player moves towards it
+        if self.game.currentLevel > MOVINGBLOCKLEVEL and self.nearTile(self.game.movingBlock) != 0:
+            locationOfPlayer = self.nearTile(self.game.movingBlock)
+            self.game.blockIsMoving = True
+            
+            if locationOfPlayer == 1 and dx == -1 and dy == 0:
+                self.game.movingBlock.setVelocity(dx,dy)
+            elif locationOfPlayer == 2 and dx == 1 and dy == 0:
+                self.game.movingBlock.setVelocity(dx,dy)
+            elif locationOfPlayer == 3 and dx == 0 and dy == -1:
+                self.game.movingBlock.setVelocity(dx,dy)
+            elif locationOfPlayer == 4 and dx == 0 and dy == 1:
+                self.game.movingBlock.setVelocity(dx,dy)
+            
+            
+            # If the player is not near a moving block, just do the normal collison check                        
+            else:
+                if not self.collideWithWalls(dx,dy):
+                    if self.checkMakeWater() and not self.collideWithTile(self.game.movingBlockTile):
+                        Water(self.game, self.x, self.y)
+                    self.move(dx,dy)                    
+        
+        
+        # When it's the earlier levels, just check if the player is colliding with a wall
+        elif not self.collideWithWalls(dx,dy):
+            if self.checkMakeWater() and not self.collideWithTile(self.game.movingBlockTile):
                 Water(self.game, self.x, self.y)
             self.move(dx,dy)
-                
-               
-
+                         
     def update(self):
         '''This method updates the player sprite '''
         
@@ -212,18 +235,25 @@ class Player(pg.sprite.Sprite):
         else:
             return False
 
-    def nearKeyHole(self):
-        ''' This method checks if the player is near the keyhole '''
+    def nearTile(self, tile):
+        ''' This method checks if the player is near the same tile as the parameter '''
         
-        if self.game.keyHole.x == self.x - 1 and self.game.keyHole.y == self.y + 0:
-            return True
-        elif self.game.keyHole.x == self.x + 1 and self.game.keyHole.y == self.y + 0:
-            return True
-        elif self.game.keyHole.x == self.x + 0 and self.game.keyHole.y == self.y - 1:
-            return True
-        elif self.game.keyHole.x == self.x + 0 and self.game.keyHole.y == self.y + 1:
-            return True
-        return False
+        # 0 = not near
+        # 1 = left
+        # 2 = right
+        # 3 = up
+        # 4 = down
+        if tile.x == self.x - 1 and tile.y == self.y + 0:
+            return 1
+        elif tile.x == self.x + 1 and tile.y == self.y + 0:
+            return 2
+        elif tile.x == self.x + 0 and tile.y == self.y - 1:
+            return 3
+        elif tile.x == self.x + 0 and tile.y == self.y + 1:
+            return 4
+        
+        return 0
+    
         
     def checkDeath(self):
         ''' This method checks if the player is stuck '''
@@ -232,6 +262,8 @@ class Player(pg.sprite.Sprite):
         right = False
         top = False
         bottom = False
+        
+       
         
         # Checks if the player is able to walk anymore, true meaning can't got that direction
         for wall in self.game.walls:
@@ -242,7 +274,7 @@ class Player(pg.sprite.Sprite):
             elif wall.x == self.x + 0 and wall.y == self.y - 1:
                 top = True
             elif wall.x == self.x + 0 and wall.y == self.y + 1:
-                bottom = True                
+                bottom = True             
         
         # If all true, it means the player can't move and must die/reset and returns True
         if left and right and top and bottom:
@@ -348,7 +380,6 @@ class Item(pg.sprite.Sprite):
         self.rect.y = y * TILESIZE
     
 
-        
 class Treasure(Item):
     ''' This class represents the treasure bag in the game, which
     is only spawned if they solved the previous level'''
@@ -408,6 +439,74 @@ class Unused(pg.sprite.Sprite):
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
         self.image.set_colorkey((0,0,0))
+        
+class MovingBlockTile(pg.sprite.Sprite):
+    ''' This class defines a tile that indicates the location of where the moving block should be in game '''
+    def __init__(self, game, x, y):
+        self.groups = game.allSprites
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.image = pg.image.load("images/movingBlockTile.png")
+        self.rect = self.image.get_rect()
+        self.x = x
+        self.y = y
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
+        self.image.set_colorkey((0,0,0))
+        
+class MovingBlock(pg.sprite.Sprite):
+    ''' This class defines a block that is pushed by the player '''
+    
+    def __init__(self, game, x, y):
+        self.groups = game.allSprites, game.updatingBlockGroup
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.image = pg.image.load("images/movingBlock.png")
+        self.rect = self.image.get_rect()
+        self.x = x
+        self.y = y
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
+        self.image.set_colorkey((0,0,0))
+        
+        self.dx = 0
+        self.dy = 0
+        
+        self.game = game
+
+    def collideWithWalls(self):
+        ''' This method checks if the block has collison with any walls '''
+        # Checks all the wall entities
+        for wall in self.game.walls:
+            
+            if wall.x == self.x + self.dx and wall.y == self.y + self.dy:
+                self.game.blockIsMoving = False
+                return True
+               
+        # Allow block to move if theres nothing in the way    
+        return False
+        
+    def move(self, dx = 0, dy = 0):
+        ''' This function moves the block '''
+        self.x += dx
+        self.y += dy
+        
+    def setVelocity(self, dx, dy):
+        ''' This function sets the velocity of the block '''
+        self.game.movingBlockSound.play()
+        self.dx = dx
+        self.dy = dy
+        
+    def update(self):
+        ''' This method updates the blocks' position '''
+        
+        tempBoolean = self.collideWithWalls()
+        
+        if not tempBoolean and self.game.blockIsMoving:
+            self.move(self.dx, self.dy)
+            
+        # Updates the position
+        self.rect.x = self.x * TILESIZE
+        self.rect.y = self.y * TILESIZE
+        
         
 class ScoreKeeperTop(pg.sprite.Sprite):
     ''' This class defines the scoreboard in where you keep track of the status of the player '''
