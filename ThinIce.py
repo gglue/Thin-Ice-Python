@@ -14,8 +14,7 @@ class Game():
     '''This class defines the main game'''
 
     def __init__(self):
-        '''This initalizer takes the game scene as a paraemter, initalizes
-        the image and rect attributes and other variables used for the player'''
+        '''This initializer defines the caption and windows and starts up the game engine config'''
         
         # Starts up the game and the audio
         pg.init()
@@ -29,36 +28,6 @@ class Game():
         pg.key.set_repeat(150, 150)
         self.screen = pg.display.set_mode((WIDTH, HEIGHT))
         
-        # Clock used to set the frame rate
-        self.clock = pg.time.Clock()
-        
-        # Contains the end point of each level for event handling
-        self.endTile = object()
-        
-        # Tells where to move the moving block later
-        self.movingBlockTile = object()
-        
-        # Checks if player can open a key socket
-        self.hasKey = False
-
-        # Checks if player has reset once on the map
-        self.resetOnce = False
-        
-        # Checks if the player has moved successfully
-        self.moved = False
-        
-        # Contains the current level of the game
-        self.currentLevel = 1
-        
-        # Lets game remember last level you solved it
-        self.lastLevelSolved = True
-        
-        # Checks if the moving block is moving
-        self.blockIsMoving = False
-        
-        # Checks if the player can still teleport
-        self.canTeleport = True
-              
     def loadData(self):
         '''This method loads data from files outside of Python'''
         self.playerSpriteSheet = Spritesheet(PLAYERSPRITE, PLAYERXML)
@@ -205,11 +174,39 @@ class Game():
         # Currents the player sprite before the map loading
         self.player = Player(self, 0, 0)
         
+        # Clock used to set the frame rate
+        self.clock = pg.time.Clock()
         
+        # Contains the end point of each level for event handling
+        self.endTile = object()
+        
+        # Tells where to move the moving block later
+        self.movingBlockTile = object()
+        
+        # Checks if player can open a key socket
+        self.hasKey = False
+
+        # Checks if player has reset once on the map
+        self.resetOnce = False
+        
+        # Checks if the player has moved successfully
+        self.moved = False
+        
+        # Contains the current level of the game
+        self.currentLevel = 1
+        
+        # Lets game remember last level you solved it
+        self.lastLevelSolved = True
+        
+        # Checks if the moving block is moving
+        self.blockIsMoving = False
+        
+        # Checks if the player can still teleport
+        self.canTeleport = True            
         
         self.scoreKeeperTop = ScoreKeeperTop(self)
         self.scoreKeeperBottom = ScoreKeeperBottom(self)
-        self.resetButton = Button(self, "reset", 65, HEIGHT - 13)
+        self.resetButton = Button(self, "reset", 65, HEIGHT - 13, 72, 21)
         
         # Load the map
         self.loadMap()
@@ -232,14 +229,6 @@ class Game():
         '''This method updates all classes/objects as part of the game loop '''
         self.allSprites.update()
         self.scoreSprites.update()
-
-
-    def drawGrid(self):
-        '''This method draws the grid for more precise x,y coordinates '''
-        for x in range(0, WIDTH, TILESIZE):
-            pg.draw.line(self.screen, LIGHTGREY, (x, 0), (x, HEIGHT))
-        for y in range(0, HEIGHT, TILESIZE):
-            pg.draw.line(self.screen, LIGHTGREY, (0, y), (WIDTH, y))
     
     def deleteMap(self):
         '''This method deletes all tiles in the current level '''
@@ -286,7 +275,6 @@ class Game():
     def draw(self):
         '''This method draws all the sprites onto the screen '''
         self.screen.fill(BGCOLOR)
-        #self.drawGrid()
         self.allSprites.draw(self.screen)
         self.scoreSprites.draw(self.screen)
         self.updatingBlockGroup.draw(self.screen)
@@ -300,19 +288,16 @@ class Game():
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 pg.quit()
+                exit()
             if event.type == pg.MOUSEBUTTONDOWN:
                 if event.button == 1 and self.resetButton.rect.collidepoint(pg.mouse.get_pos()):
                     # Play reset animation and sounds and reset the map when hitting the button
                     self.reset()
                     self.player.setFrame(RESETTING)
                     self.playResetSounds()
-                
-                
+                                
             if event.type == pg.KEYDOWN:
-                # Exits the game with the ESC key
-                if event.key == pg.K_ESCAPE:
-                    self.quit()
-                    
+                # Exits the game with the ESC key                 
                 # Arrow keys handle the moving
                 if event.key == pg.K_LEFT:
                     self.player.checkAndMove(dx=-1)
@@ -326,7 +311,6 @@ class Game():
                
         #If player moved, check if he's on the finish line
         if self.moved:
-            print(len(self.allSprites))
             # Update the scorekeepers
             self.scoreKeeperTop.setCompleteTiles(self.scoreKeeperTop.getCompleteTiles() + 1)
             self.scoreKeeperBottom.setScore(self.scoreKeeperBottom.getScore() + 1)
@@ -435,8 +419,98 @@ class Game():
     
             
             
+class TitleScreen():
+    '''This class defines the main game'''
 
-g = Game()
+    def __init__(self):
+        '''This initializer takes the main menu scene as a parameter, initalizes
+        the image and rect attributes and other variables used for the player'''
+        
+        # Starts up the game and the audio
+        pg.init()
+        pg.mixer.init()
+        
+        # Set title and icon
+        pg.display.set_caption("Thin-Ice!")
+        pg.display.set_icon(pg.image.load('images/icon.png'))
+        
+        self.screen = pg.display.set_mode((WIDTH, HEIGHT))
+
+    def loadData(self):
+        '''This method loads data from files outside of Python'''
+        
+        # Loads the Background music
+        pg.mixer.music.load('sound/music.mp3')
+        pg.mixer.music.set_volume(0.1)
+        
+        
+    def new(self):
+        '''This method initializes all the variables and sets up the game '''
+        
+        # Loads external data
+        self.loadData()
+        
+        # Creates the groups used for event handling later on
+        self.scoreSprites = pg.sprite.Group()
+        
+        # Plays and infinitely loops the music
+        pg.mixer.music.play(-1)
+        
+        # Clock used to set the frame rate
+        self.clock = pg.time.Clock()
+        
+        # Is the main menu pictures
+        self.mainMenu = BeginMenu(self)
+        
+        # The starting picture
+        self.startButton = Button(self, "start", 237, 390, 108, 32)
+
+    def run(self):
+        '''This method is the game loop which runs most of the game '''
+        self.looping = True
+        while self.looping:
+            self.clock.tick(FPS)
+            self.events()
+            self.update()
+            self.draw()
+            
+
+    def update(self):
+        '''This method updates all classes/objects as part of the game loop '''
+        self.scoreSprites.update()
+
+    def events(self):
+        '''This method handles the event handling'''
+        
+        # CONTROLS
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                pg.quit()
+                exit()
+            if event.type == pg.MOUSEBUTTONDOWN:
+                if event.button == 1 and self.startButton.rect.collidepoint(pg.mouse.get_pos()) and self.startButton.buttonType == "start":
+                    # When player clicks the start button, show the instruction screen
+                    self.mainMenu.instructions()
+                    self.startButton.__init__(self, "play", 237, 390, 108, 32)
+                    
+                elif event.button == 1 and self.startButton.rect.collidepoint(pg.mouse.get_pos()) and self.startButton.buttonType == "play":
+                    # Start the actual game
+                    x = Game()
+                    x.new()
+                    x.run()
+                    
+                    
+    def draw(self):
+        '''This method draws all the sprites onto the screen '''
+        self.screen.fill(BGCOLOR)
+        self.scoreSprites.draw(self.screen)
+        pg.display.flip()
+                    
+
+
+
+g = TitleScreen()
+
 while True:
     g.new()
     g.run()

@@ -40,7 +40,7 @@ class Spritesheet:
 class Button(pg.sprite.Sprite):
     ''' This class represents a clickable button in the game '''
     
-    def __init__(self, game, buttonType, xCoordinate, yCoordinate):
+    def __init__(self, game, buttonType, xCoordinate, yCoordinate, width, height):
         '''This initializer takes the game scene as a paraemter, initalizes
         the image and rect attributes and other variables used for the player'''
         
@@ -52,19 +52,29 @@ class Button(pg.sprite.Sprite):
         self.groups = game.scoreSprites
         pg.sprite.Sprite.__init__(self, self.groups)
         
-        
-        self.buttonImages = ["images/resetButtonOne.png", "images/resetButtonTwo.png"]
-        
-        
-        # Variable to distingush what the text of the button is
+        # Different button type means different images
         if buttonType == "reset":
-            self.number = 0
+            self.buttonImages = ["images/resetButtonOne.png", "images/resetButtonTwo.png"]
+            
+        elif buttonType == "start":
+            self.buttonImages = ["images/startButtonOne.png", "images/startButtonTwo.png"]
+            
+        else:
+            self.buttonImages = ["images/playButtonOne.png", "images/playButtonTwo.png"]
+            
+        
+        # Set the width and height of the button
+        self.width = width
+        self.height = height
+        
+        # Stores what type of button it is
+        self.buttonType = buttonType
         
         # Set the image
-        self.image = pg.image.load(self.buttonImages[self.number])
+        self.image = pg.image.load(self.buttonImages[0])
         
         # Resize the button
-        self.image = pg.transform.scale(self.image, (72, 21))
+        self.image = pg.transform.scale(self.image, (self.width, self.height))
         
         
         # Set the location of the button
@@ -84,13 +94,13 @@ class Button(pg.sprite.Sprite):
         self.image = pg.image.load(self.buttonImages[number])
         
         # Resize the button
-        self.image = pg.transform.scale(self.image, (72, 21))
+        self.image = pg.transform.scale(self.image, (self.width, self.height))
         
     def update(self):
         '''Updates the game sprite based on my mouse input '''
         
         # Check if mouse is hovering over reset button
-        if self.game.resetButton.getRect().collidepoint(pg.mouse.get_pos()):
+        if self.getRect().collidepoint(pg.mouse.get_pos()):
             self.setImage(1)
         else:
             self.setImage(0)
@@ -110,7 +120,7 @@ class Player(pg.sprite.Sprite):
         # Set the sprite's image and sets the rect attributes
         self.game = game
         
-        self.currentFrame = 28
+        self.currentFrame = 16
         self.image = self.game.playerSpriteSheet.get_image(self.currentFrame)
         self.image.set_colorkey(BLUE)
         self.rect = self.image.get_rect()
@@ -555,10 +565,11 @@ class MovingBlock(pg.sprite.Sprite):
             self.move(self.dx, self.dy)
 
         # Teleport if it touches a teleporter
-        if self.collideWithTile(self.game.secondTeleporter):
-            if self.game.canTeleport:
-                self.game.movingBlock.movetoCoordinate(self.game.firstTeleporter.x, self.game.firstTeleporter.y)
-                self.game.teleportSound.play()        
+        if self.game.currentLevel > TELEPORTLEVEL:
+            if self.collideWithTile(self.game.secondTeleporter):
+                if self.game.canTeleport:
+                    self.game.movingBlock.movetoCoordinate(self.game.firstTeleporter.x, self.game.firstTeleporter.y)
+                    self.game.teleportSound.play()        
             
         # Updates the position
         self.rect.x = self.x * TILESIZE
@@ -704,4 +715,20 @@ class ScoreKeeperBottom(pg.sprite.Sprite):
         self.message = "POINTS %-4d" % self.score
         self.image = self.font.render(self.message, 1, (0, 0, 0))       
 
+class BeginMenu(pg.sprite.Sprite):
+    '''This class represents the images used for the start menu '''
+    
+    def __init__(self, game):
+        self.groups = game.scoreSprites
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.menuImages = ['images/titleScreen.png', 'images/instructionScreen.png']
         
+        self.image = pg.image.load(self.menuImages[0])
+        
+        self.rect = self.image.get_rect()
+        
+        
+    def instructions(self):
+        ''' This function changes the main menu picture to the second '''
+        self.image = pg.image.load(self.menuImages[1])
+        self.rect = self.image.get_rect()
