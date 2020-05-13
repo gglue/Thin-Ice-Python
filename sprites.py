@@ -59,10 +59,11 @@ class Button(pg.sprite.Sprite):
         elif buttonType == "start":
             self.buttonImages = ["images/startButtonOne.png", "images/startButtonTwo.png"]
             
-        else:
+        elif buttonType == "play":
             self.buttonImages = ["images/playButtonOne.png", "images/playButtonTwo.png"]
             
-        
+        else:
+            self.buttonImages = ["images/finishButtonOne.png", "images/finishButtonTwo.png"]
         # Set the width and height of the button
         self.width = width
         self.height = height
@@ -597,7 +598,7 @@ class ScoreKeeperTop(pg.sprite.Sprite):
         self.completeTiles = 0
         self.totalTiles = 0
         self.solvedLevels = 0
-
+        self.playerMelted = 0
         # The text that contains the score that constantly update
         self.message = ""
         self.image = self.font.render(self.message, 1, (0, 0, 0))
@@ -611,44 +612,11 @@ class ScoreKeeperTop(pg.sprite.Sprite):
         
         # Variable just used for keeping track of the game
         self.game = game
-        
-    def setTotalTiles(self, amount):
-        ''' This method lets the scoreboard know the total number of free tiles '''
-        self.totalTiles = amount
-        
-    def getTotalTiles(self):
-        ''' This method returns the total number of free tiles '''
-        return self.totalTiles      
-        
-    def setCompleteTiles(self, amount):
-        ''' This method lets the scoreboard know the total number of complete tiles '''
-        self.completeTiles = amount
-        
-    def getCompleteTiles(self):
-        ''' This method returns the total number of complete tiles '''
-        return self.completeTiles
-    
-    def setCurrentLevel(self, amount):
-        ''' Sets the current level number for the HUD '''
-        self.currentLevel = amount    
-        
+                    
     def checkFinish(self):
         ''' This method checks if the player has finished the level by passing all tiles '''
-        return (self.completeTiles == self.totalTiles)
-        
-        
-    def setCurrentLevel(self, amount):
-        ''' This method lets the scoreboard know the current level'''
-        self.currentLevel = amount
-        
-    def setSolvedLevel(self, amount):
-        ''' This method lets the scoreboard know the number of solved levels'''
-        self.solvedLevels = amount
-        
-    def getSolvedLevel(self):
-        ''' This method returns the total number of solved levels '''
-        return self.solvedLevels
-    
+        return (self.completeTiles == self.totalTiles)      
+          
     def update(self):
         '''This method will be called automatically to display 
         the game information at the top of the game window.'''
@@ -689,24 +657,7 @@ class ScoreKeeperBottom(pg.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.centery = HEIGHT - 12
         self.rect.centerx = WIDTH - TILESIZE * 3
-        
-    
-    def setScore(self, amount):
-        ''' This method updates the current score '''
-        self.score = amount
-
-    def setPreviousScore(self, amount):
-        ''' This method sets the previous score for storage in case of a reset '''
-        self.previousScore = amount
-        
-    def getScore(self):
-        ''' This method returns the current score '''
-        return self.score
-    
-    def getPreviousScore(self):
-        ''' This method returns the previous score '''
-        return self.previousScore
-    
+            
     def update(self):
         '''This method will be called automatically to display 
         the game information at the bottom of the game window.'''
