@@ -6,7 +6,7 @@ Description: Pygame remake of Club Penguin's Thin-ice
 
 # Import classes used for the game
 from data.classes.sprites import *
-
+from sys import exit
 class Game():
     '''This class defines the main game'''
 
@@ -190,7 +190,7 @@ class Game():
         self.moved = False
         
         # Contains the current level of the game
-        self.currentLevel = 18
+        self.currentLevel = 1
         
         # Lets game remember last level you solved it
         self.lastLevelSolved = True

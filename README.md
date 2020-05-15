@@ -17,5 +17,6 @@ Pygame 2 and at least Python 3.6 is needed to run the game.
 
 ## Acknowledgments
 
-* Club Penguin for the spritesheets
+* Club Penguin for the spritesheets, music and sound effects
 * Final Fantasy for the ending music
+* I did not make any of the sprites, nothing is owned by me!
