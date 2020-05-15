@@ -12,14 +12,14 @@ YELLOW = (255, 255, 0)
 LIGHTGREY = (100, 100, 100)
 BGCOLOR = DARKGREY
 
-PLAYERSPRITE = "images/player.png"
-PLAYERXML = "images/player.xml"
-WATERSPRITE = "images/water.png"
-WATERXML = "images/water.xml"
-KEYSPRITE = "images/key.png"
-KEYXML = "images/key.xml"
-TELEPORTERSPRITE = "images/teleporter.png"
-TELEPORTERXML = "images/teleporter.xml"
+PLAYERSPRITE = "data/images/player.png"
+PLAYERXML = "data/images/player.xml"
+WATERSPRITE = "data/images/water.png"
+WATERXML = "data/images/water.xml"
+KEYSPRITE = "data/images/key.png"
+KEYXML = "data/images/key.xml"
+TELEPORTERSPRITE = "data/images/teleporter.png"
+TELEPORTERXML = "data/images/teleporter.xml"
 
 BLUE = (30, 45, 255)
 

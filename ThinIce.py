@@ -5,10 +5,7 @@ Description: Pygame remake of Club Penguin's Thin-ice
 '''
 
 # Import classes used for the game
-import pygame as pg
-from sprites import *
-from settings import *
-
+from data.classes.sprites import *
 
 class Game():
     '''This class defines the main game'''
@@ -22,10 +19,10 @@ class Game():
         
         # Set title and icon
         pg.display.set_caption("Thin-Ice!")
-        pg.display.set_icon(pg.image.load('images/icon.png'))
+        pg.display.set_icon(pg.image.load('data/images/icon.png'))
         
         # Allows to hold down input keys
-        pg.key.set_repeat(150, 150)
+        pg.key.set_repeat(200, 175)
         self.screen = pg.display.set_mode((WIDTH, HEIGHT))
         
     def loadData(self):
@@ -36,43 +33,43 @@ class Game():
         self.teleporterSpriteSheet = Spritesheet(TELEPORTERSPRITE, TELEPORTERXML)
         
         # Loads the Background music
-        pg.mixer.music.load('sound/music.ogg')
+        pg.mixer.music.load('data/sound/music.ogg')
         pg.mixer.music.set_volume(0.1)
         
         # Sound effect when a player moves
-        self.moveSound = pg.mixer.Sound("sound/move.ogg")
+        self.moveSound = pg.mixer.Sound("data/sound/move.ogg")
         self.moveSound.set_volume(0.1)
         
         # Sound effect when a player finishs a level completely
-        self.allTileComplete = pg.mixer.Sound("sound/allTileComplete.ogg")
+        self.allTileComplete = pg.mixer.Sound("data/sound/allTileComplete.ogg")
         self.allTileComplete.set_volume(0.2)
 
         # Sound effect when a player dies
-        self.deadSound = pg.mixer.Sound("sound/dead.ogg")
+        self.deadSound = pg.mixer.Sound("data/sound/dead.ogg")
         self.deadSound.set_volume(0.2)
 
         # Sound effect when a player touches a treasure bag
-        self.treasureSound = pg.mixer.Sound("sound/treasure.ogg")
+        self.treasureSound = pg.mixer.Sound("data/sound/treasure.ogg")
         self.treasureSound.set_volume(0.2)
 
         # Sound effect when a player moves away from an ice tile
-        self.iceBreakSound = pg.mixer.Sound("sound/breakIce.ogg")
+        self.iceBreakSound = pg.mixer.Sound("data/sound/breakIce.ogg")
         self.iceBreakSound.set_volume(0.2)
         
         # Sound effect when a player touches a key or unlocks a key socket
-        self.keyGet = pg.mixer.Sound("sound/keyGet.ogg")
+        self.keyGet = pg.mixer.Sound("data/sound/keyGet.ogg")
         self.keyGet.set_volume(0.2)
 
         # Sound effect when a player is resetted to the start
-        self.resetSound = pg.mixer.Sound("sound/reset.ogg")
+        self.resetSound = pg.mixer.Sound("data/sound/reset.ogg")
         self.resetSound.set_volume(0.2)
         
         # Sound effect when a player hits a moving block
-        self.movingBlockSound = pg.mixer.Sound("sound/movingBlockSound.ogg")
+        self.movingBlockSound = pg.mixer.Sound("data/sound/movingBlockSound.ogg")
         self.movingBlockSound.set_volume(0.2)
         
         # Sound effect when a player teleports
-        self.teleportSound = pg.mixer.Sound("sound/teleportSound.ogg")
+        self.teleportSound = pg.mixer.Sound("data/sound/teleportSound.ogg")
         self.teleportSound.set_volume(0.2)
         
     def loadMap(self):
@@ -84,7 +81,7 @@ class Game():
         
         
         # Opens the file and appends all the data to mapData
-        fileName = "maps/level%d.txt" % self.currentLevel
+        fileName = "data/maps/level%d.txt" % self.currentLevel
         currentMap = open(fileName, "r")
         for line in currentMap:
             mapData.append(line)
@@ -193,7 +190,7 @@ class Game():
         self.moved = False
         
         # Contains the current level of the game
-        self.currentLevel = 1
+        self.currentLevel = 18
         
         # Lets game remember last level you solved it
         self.lastLevelSolved = True
@@ -309,13 +306,13 @@ class Game():
             if event.type == pg.KEYDOWN:
                 # Exits the game with the ESC key                 
                 # Arrow keys handle the moving
-                if event.key == pg.K_LEFT:
+                if event.key == pg.K_LEFT or event.key == pg.K_a:
                     self.player.checkAndMove(dx=-1)
-                if event.key == pg.K_RIGHT:
+                if event.key == pg.K_RIGHT or event.key == pg.K_d:
                     self.player.checkAndMove(dx=1)
-                if event.key == pg.K_UP:
+                if event.key == pg.K_UP or event.key == pg.K_w:
                     self.player.checkAndMove(dy=-1)
-                if event.key == pg.K_DOWN:
+                if event.key == pg.K_DOWN or event.key == pg.K_s:
                     self.player.checkAndMove(dy=1)
                         
                
@@ -443,7 +440,7 @@ class TitleScreen():
         
         # Set title and icon
         pg.display.set_caption("Thin-Ice!")
-        pg.display.set_icon(pg.image.load('images/icon.png'))
+        pg.display.set_icon(pg.image.load('data/images/icon.png'))
         
         self.screen = pg.display.set_mode((WIDTH, HEIGHT))
 
@@ -451,11 +448,11 @@ class TitleScreen():
         '''This method loads data from files outside of Python'''
         
         # Loads the Background music
-        pg.mixer.music.load('sound/music.ogg')
+        pg.mixer.music.load('data/sound/music.ogg')
         pg.mixer.music.set_volume(0.1)
         
         # Sound effect when you click the button
-        self.clickSound = pg.mixer.Sound("sound/move.ogg")
+        self.clickSound = pg.mixer.Sound("data/sound/move.ogg")
         self.clickSound.set_volume(0.2)
          
     def new(self):
@@ -533,7 +530,7 @@ class ScoreScreen():
         
         # Set title and icon
         pg.display.set_caption("Thin-Ice!")
-        pg.display.set_icon(pg.image.load('images/icon.png'))
+        pg.display.set_icon(pg.image.load('data/images/icon.png'))
         
         self.screen = pg.display.set_mode((WIDTH, HEIGHT))
         
@@ -547,21 +544,21 @@ class ScoreScreen():
         '''This method loads data from files outside of Python'''
         
         # Loads the Background music
-        pg.mixer.music.load('sound/winner.ogg')
+        pg.mixer.music.load('data/sound/winner.ogg')
         pg.mixer.music.set_volume(0.1)
 
         # Instantiate the font used for the game
-        self.font = pg.font.Font("font/arcade.ttf", 18) 
+        self.font = pg.font.Font("data/font/arcade.ttf", 18) 
         
         # Puffle image
-        self.puffle= pg.image.load("images/puffle.png")
+        self.puffle= pg.image.load("data/images/puffle.png")
         
         # Sound effect when a line loads
-        self.lineSound = pg.mixer.Sound("sound/move.ogg")
+        self.lineSound = pg.mixer.Sound("data/sound/move.ogg")
         self.lineSound.set_volume(0.2)
                
         # Sound effect when the puffle loads
-        self.puffleSound = pg.mixer.Sound("sound/allTileComplete.ogg")
+        self.puffleSound = pg.mixer.Sound("data/sound/allTileComplete.ogg")
         self.puffleSound.set_volume(0.2)
 
     def new(self):
